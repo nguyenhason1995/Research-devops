@@ -8,8 +8,8 @@
 echo alala
 ```
 
-##[link](www.google.com)
+## [link](https://www.youtube.com/watch?v=jgCVkQhlScc&list=RDjgCVkQhlScc&start_radio=1)
 
-###\*text*
-###\test thử xem ntn
+### \*text*
+### \test thử xem ntn
 
