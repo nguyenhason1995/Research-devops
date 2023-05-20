@@ -1,0 +1,13 @@
+FROM centos:7
+
+RUN yum install httpd unzip -y
+
+ENV HTML example-webpage
+
+WORKDIR /var/www/html/
+
+ADD https://github.com/seanmiles/example-webpage/archive/refs/heads/gh-pages.zip ./code.zip
+
+RUN unzip code.zip && mv $HTML-gh-pages/* . && echo $HTML > ./env.html
+
+CMD apachectl -DFOREGROUND 

@@ -1,0 +1,17 @@
+Hướng dẫn này đưa ra 1 giới thiệu cơ bản của Nginx và mô tả vài task đơn giản mà có thể hoàn thành với nginx. Hướng dẫn này đã hỗ trợ cài đặt nginx trên máy của độc giả.Nếu bản hướng dẫn này không hữu dụng, hãy xem trang cài đặt nginx. Hướng dẫn mô tả start và stop nginx, reload cấu hình của nginx, giải thích cấu trúc của file cấu hình và mô tả làm cách nào để thiết lập nginx đến server nội dung tĩnh. Làm cách nào để cấu hình nginx x như 1 proxy server, và làm thế nào để kết nối với ứng dụng  FastCGI.
+Nginx có 1 process master và vài process worker. Mục đích chính của master process là để đọc và đánh gia câu hình, và duy trì worker process. Worker process xử lý các request. nginx sử dụng event dựa trên mô hình và OS phụ thuộc vào cơ chế phân phối hiệu quả giữa các worker process. Số lượng các worker process được định nghĩa trong file cấu hình và được fix bới một cấu hình nhất định hay tự động hóa đã đc điều chỉnh đến số lượng CPU core có sẵn 
+
+Cách nginx và mô hình hoạt động của nó đã được xác định trong file cấu hình. Mặc định, file cấu hình được đặt tên là nginx. conf và đặt trong đường dẫn /usr/local/nginx/conf, /etc/nginx, or /usr/local/etc/nginx.
+
+Starting, Stopping, and Reloading Configuration
+Để start nginx, chạy file được thưc thi. Để start nginx, chạy file thực thi, nó có thể đã được kiểm soát với parameter -s. Theo như cấu trúc
+nginx -s signal
+Nơi signal có thể là một trong theo những điều sau:
+stop — fast shutdown
+quit — graceful shutdown
+reload — reloading the configuration file
+reopen — reopening the log files
+
+cho vi du, de stop nginx pocess voi cho worker process ket thuc serving current request, co the thuc hien cac command sau:
+nginx -s quit 
+command nay nen duoc thuc thi duoi cung 1 user ma no duoc start boi nginx

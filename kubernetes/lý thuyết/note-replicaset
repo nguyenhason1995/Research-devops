@@ -1,0 +1,23 @@
+kubectl scale --replicas=6 -f replicaset-defination.yml
+kubectl scale replicaset myapp-replicaset --replicas=2 (cách 2)
+# cách scale 
+
+# câu lệnh tạo file
+kubectl create -f replicaset-definition.yml
+
+# check replicaset
+kubectl get replicaset
+
+kubectl delete replicaset myapp-replicaset
+# Để edit replicaset 
+kubectl edit replicaset myapp-replicaset
+# trong đó myapp-replicaset là tên replicaset
+# Cuộn xuống dòng replicaset để sửa số replicaset
+# câu lệnh describe replicaset
+kubectl describe replicaset new-replica-set 
+# trong đó new-relica-set là tên của replicaset
+
+# Câu lệnh để xem mô tả của replicaset (trong đây sẽ có phiên bản của replicaset)
+kubectl explain replicaset
+
+

@@ -1,0 +1,14 @@
+bước 1: chạy container apache
+Docker run -d --name httpd -hhttpd -p 80:80 apache 
+bước 2: tạo 1 file html bên ngoài máy host
+echo "alo alo" > test.html 
+Bước 3: sử dụng docker cp
+docker cp test.html httpd:/usr/local/apache2/htdocs/index.html
+# httpd là name khi cấu hình docker run ...
+................
+Copy từ container sang host
+Bước 1: vào bên trong container
+Docker exec -it ....
+Bước 2: tạo 1 file text bên trong container 
+Bước 3: exit ra ngoài máy host vào dùng lệnh cp
+docker cp html:/opt/test.txt .

@@ -1,0 +1,58 @@
+version: "3"
+
+#NETWORK
+networks:
+  mynetwork:
+    driver: bridge
+#VOLUMES
+volumes:
+  dirsite:
+    driver_opts:
+      device: /vagrant/docker_images/docker_compose/lab_apache_php_mysql/mycode/sites 
+      o: bind
+
+services:
+# container PHP 
+  myphp:
+    container_name: php-produce
+    build: 
+      dockerfile: Dockerfile
+      context: /vagrant/docker_images/docker_compose/lab_apache_php_mysql/mycode/php 
+    hostname: php
+    restart: always
+    networks:
+      -  mynetwork
+    volumes:
+      - dirsite:/home/sites/
+# container httpd:
+  myhttpd:
+    container_name: c-httpd01
+    image: "httpd:latest"
+    hostname: httpd  
+    restart: always
+    networks:
+      - mynetwork
+    volumes:
+      - dirsite:/home/sites/
+      - /vagrant/docker_images/docker_compose/lab_apache_php_mysql/mycode/httpd.conf:/usr/local/apache2/conf/httpd.conf
+    ports:
+      - "9999:80"
+      - "443:443"
+#container mysql:
+  mymysql: 
+    container_name: mysql-product
+    image: "mysql:latest"
+    hostname: mysql
+    restart: always
+    networks:
+      - mynetwork
+    volumes:
+      - /vagrant/docker_images/docker_compose/lab_apache_php_mysql/mycode/db:/var/lib/mysql
+      - /vagrant/docker_images/docker_compose/lab_apache_php_mysql/mycode/my.cnf:/etc/mysql/my.cnf
+    environment:
+    - MYSQL_ROOT_PASSWORD=123abc
+    - MYSQL_DATABASE=db_site
+    - MYSQL_USER=siteuser
+    - MYSQL_PASSWORD=sitepass 
+      
+      

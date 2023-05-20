@@ -1,0 +1,11 @@
+kube api server sẽ chịu trách nhiệm sau
+1. Authenticate User
+2. Validate Request
+3. Retrieve data
+4. Update ETCD
+5. Scheduler
+6. Kubelet
+
+Các đường dẫn quan trọng
+/etc/kubernetes/manifests/kube-apiserver.yaml
+/etc/systemd/system/kube-apiserver.service

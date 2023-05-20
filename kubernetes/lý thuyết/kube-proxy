@@ -1,0 +1,4 @@
+kube-proxy là một quá trình chạy trên mỗi node trong cụm kubenetes
+kube-proxy chịu trách nhiệm cho việc chuyển tiếp dòng 
+TCP, UDP và SCTP hoặc xoay vòng chuyển tiếp qua một tập các Pod backends và 
+nó cũng cài đặt các luật chuyển tiếp được định nghĩa bởi người dùng thông qua các đối tượng Server API.

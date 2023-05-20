@@ -1,0 +1,18 @@
+version: '3'
+services:
+  web:
+    image: nginx:alpine
+    container_name: nginx
+    networks:
+      - test_network
+  
+  db:
+    image: mysql:5.7
+    container_name: mysql
+    environment:
+    - MYSQL_ROOT_PASSWORD=1234567 
+    - SHOW=true
+    networks:
+      - test_network
+networks:
+  test_network:

@@ -1,0 +1,31 @@
+thư mục quản lý của docker (docker root dir)
+var/lib/docker
+thư mục cấu hình của docker
+/var/lib/systemd/system/docker.service
+#sau khi cấu hình xong thì dùng lệnh sau để reload lại cấu hình
+systemctl daemon-reload
+.............
+đổi đường dẫn quản lý file cấu hình của docker
+Giả sử đổi sang /mnt 
+#Bước 1
+sudo systemctl stop docker
+#Bước 2
+sudo /var/lib/systemd/system/docker.service
+ #Bước 3
+ Sửa trong [service]
+ mục ExecStart=... ở cuối dòng thêm "--data-root /mnt/docker" sau đó save lại
+ #Bước 4
+ systemctl daemon-reload
+ #Bước 5
+ systemctl restart docker
+=>> đã mount đc 
+ giờ muốn chuyển các images cũ lên /mnt
+ #1 stop docker
+ systemctl stop docker
+ #2 rm -rf /mnt
+ #3 vào var/lib/docker mv docker /mnt
+ #4 restart lại docker 
+ 
+
+
+

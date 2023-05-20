@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: myapp
+spec:
+  type: NodePort
+  ports:
+  - port: 80
+    targetPort: 80
+    nodePort: 30008
+  selector:
+    app: myapp
+    type: front-end
+
+# trong đó:
+# Port là đầu cổng của service
+# targetPort: là đầu connect tới cổng pod
+# nodePort: là đầu cổng để bên ngoài connect vào
+
+# Sau khi cấu hình xong thì sử dụng lệnh 
+#kubectl create -f service-definition.yml

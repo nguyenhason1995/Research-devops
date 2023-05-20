@@ -1,0 +1,15 @@
+version: '3'
+services:
+  web:
+    image: my_image
+    container_name: test_cont
+    build: 
+      context: .
+      dockerfile: Dockerfile
+  # build từ dockerfile
+  # để chạy lệnh sử dụng 
+  #docker-compose -f docker-compose-with-dockerfile.yml build
+
+      
+
+    

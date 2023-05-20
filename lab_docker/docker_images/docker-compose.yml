@@ -1,0 +1,26 @@
+version: '3'
+#Network
+networks:
+  my-networks:
+    driver: bridge
+
+services:
+  my-nginx: 
+    container_name: custom-nginx
+    image: "nginx:latest"
+    hostname: nginx
+    restart: always
+    networks:
+      - my-networks
+    ports:
+      - "8888:80"
+
+  my-httpd: 
+    container_name: custom-httpd
+    image: "httpd:latest"
+    hostname: httpd
+    restart: always
+    networks:
+      - my-networks
+    ports:
+      - "9998:80"

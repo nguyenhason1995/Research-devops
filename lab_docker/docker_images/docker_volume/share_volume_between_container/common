@@ -1,0 +1,19 @@
+docker file mount host vao ben trong container
+chay script "date:
+#step 1
+mkdir /mnt/common
+chown 1000:1000 common/
+# muc dich de k su dung quyen root. Lat moi mount duoc
+#viết dockerfile
+...
+#step 2
+# Viet file start.sh
+#Step 3
+tao thu muc html_files 
+docker build ....
+#Step 4
+chay docker volume
+docker run -d --name gen -v $PWD/html_files:/opt volume:v1
+#step 5 sau khi co file text o tren. Gio gan tiep vao nginx
+docker run -d --name nginx -v $PWD/html_files:/usr/share/nginx/html nginx
+

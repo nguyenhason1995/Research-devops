@@ -1,0 +1,17 @@
+service giúp kết nối mạng bên trong và bên ngoài kubenetes
+
+# Node port:
+có 1 node có thể dùng node đó để bên ngoài gọi vào
+
+# Cluster IP:
+# Loadblancer:
+
+
+# các câu lệnh cần chú ý 
+kubectl create -f service-definition.yml
+
+kubectl get services
+kubectl create service Cluster --tcp=8080:80 --dry-run=client -o yaml
+
+
+

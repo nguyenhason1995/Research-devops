@@ -1,0 +1,28 @@
+FROM centos:7
+
+RUN yum install httpd unzip -y
+
+ARG user=application
+
+
+LABEL maintainer="Sonnh"
+
+LABEL vendor="companyA"
+
+LABEL random="abc"
+
+ENV HTML example-webpage
+
+WORKDIR /var/www/html/
+
+ADD https://github.com/seanmiles/example-webpage/archive/refs/heads/gh-pages.zip ./code.zip
+
+RUN unzip code.zip && mv $HTML-gh-pages/* . && echo $HTML > ./env.html
+
+RUN useradd $user && chown $user:$user /var/www/html -R
+USER $user
+RUN rm -rf code.zip $HTML-gh-pages
+USER root
+CMD apachectl -DFOREGROUND 
+# de build với arg sư dụng câu lệnh build sau
+# docker build -t centos_httpd_with_arg:v1 -f Dockerfile_arg --build-arg user=sonnh .

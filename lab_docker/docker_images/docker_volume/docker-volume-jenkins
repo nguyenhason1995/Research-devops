@@ -1,0 +1,20 @@
+#step 1:
+docker run --rm -it jenkins/jenkins bash #(test)
+#step 2: 
+mkdir /mnt/jenkins/
+#step 3:
+docker run -d -- name jenkins -p 8080:8080 -v /mnt/jenkins:/var/jenkins_home jenkins/jenkins
+#step 4: check log
+docker logs -f "container id"
+# Ket qua false
+# vi mac dinh khi "run" jenkin laf su dung user jenkins
+# chown file mount trong may host
+sudo chown 1000:1000 -R /mnt/jenkins/
+# Sau do "run" lai container
+# nen chown truoc
+# Sau do vao trong container 
+cat /var/jenkins_home/secrets/initialAdminPassword
+# De xem mat khau 
+Dung mat khau de vao web
+#Sau khi cau hinh jenkins xong thì remove container cu và create container mói
+

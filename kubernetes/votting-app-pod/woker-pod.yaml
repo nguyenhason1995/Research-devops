@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: woker-app-pod
+  labels: 
+    name: woker-app-pod
+    app: demo-votting-app 
+spec:
+  containers:
+  - name: votting-app
+    image: kodekloud/examplevottingapp_woker:v1
+    
+ 

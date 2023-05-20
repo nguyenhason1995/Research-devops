@@ -1,0 +1,4 @@
+#step 1
+mkdir mongodb
+#step 2
+docker run -d --name mongo -v /mnt/mongodb/:/data/db -p 27017:27017 mongo

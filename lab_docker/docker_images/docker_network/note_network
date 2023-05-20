@@ -1,0 +1,53 @@
+có 3 loại network
+- Bridge network
+- host network
+- none network
+
+Ip mặc định của docker
+ip addr | grep docker
+thuộc dạng bridge network
+#Để xem network sử dụng lệnh 
+docker network inspect bridge
+#Trong đó bridge là tên mạng 
+
+#Để tạo network 
+docker network create -d bridge --subnet 172.18.0.0/16 --gateway 172.18.0.1 new_network
+# Để xem mạng bridge new_network
+docker network inspect
+#Câu lệnh xóa network
+docker network rm new_network
+# new_network là tên network
+
+.........
+# Gán container vào network
+docker run -dti --network new_network --name container3 centos
+# Check xem đã gán network vào container chưa
+docker inspect container3
+...........
+# Connect or disconnect network
+# Tạo network 
+docker network create -d bridge --subnet 172.30.0.0/16 --gateway 172.30.0.1/16 net1
+# Network 2
+docker network create -d bridge --subnet 172.31.0.0/16 --gateway 172.31.0.1/16 net2
+# Gán network vào container centos
+docker run -dti --name net1_container--network net1 centos
+docker run -dti --name net2_container --network net2 centos
+# ping 2 container
+docker exec -it net1_container bash -c "ping net2_container"
+#tất nhiên là k ping được vì khác dải mà
+#Sử dụng network connect 
+docker network connect net1 net2_container
+#Nối mạng net1 vào container net2_container
+# lúc này mới connect được 
+----------- 
+set ip trong container 
+# Giả sử tạo 1 network
+docker network create -d bridge --subnet 172.40.0.0/16 --gateway 172.40.0.1/16 test
+# Gán ip trong container
+docker run -dti --network test --ip 172.40.0.100 --name test2 centos
+........
+mạng host là sử dụng chung mạng vs máy host
+.......
+#none network không có network để kết nối giữa container và host
+Trong 1 số trường hợp và lý do nên để 1 container ở 1 nơi bất kỳ
+

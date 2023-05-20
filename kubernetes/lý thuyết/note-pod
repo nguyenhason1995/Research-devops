@@ -1,0 +1,11 @@
+#Dùng lệnh sau để create pod:
+kubectl run nginx --image=nginx
+# Lệnh xem chi tiết
+kubectl get pods -o wide
+# Dùng lệnh chạy redis
+kubectl run redis --image=redis --dry-run=client -o yaml > redis.yaml
+#lệnh chạy pod
+kubectl apply -f redis.yaml
+# lệnh tạo file yaml
+kubectl create -f pod.yaml
+

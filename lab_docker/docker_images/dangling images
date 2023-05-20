@@ -1,0 +1,4 @@
+dangling images la cac image khác version nhưng không được đánh tag
+
+note: phải đánh tag để phân biệt, giả sử không đánh thì phải xóa
+docker rmi $(docker images -f dangling=true -q)

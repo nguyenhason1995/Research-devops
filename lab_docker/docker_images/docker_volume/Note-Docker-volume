@@ -1,0 +1,27 @@
+Có 3 cách mount volume 
+volume, bind mount, tmpfs 
+
+Volume tạo vào trong thư mục /var/lib/docker do docker quản lý
+bind mount có thể mount từ bất cứ thư mục nào trên máy host
+tmpfs lưu vào memory (ram) trên máy host
+Sử dụng bind mount:
+docker run -d -v /mnt/mysql:/var/lib/mysql --name mysql -e "MYSQL_ROOT_PASSWORD=12345678" mysql:5.7
+Sử dụng dạng volume
+docker volume create mysql_volume
+dữ liệu được lưu trong /var/lib/volume
+map volume vào trong container
+docker run -d -v /mysql_volume:/var/lib/mysql --name mysql -e "MYSQL_ROOT_PASSWORD=12345678" mysql:5.7
+# Để xem thông tin volume thì dùng lệnh docker inspect mysql. trong đó mysql là tên container
+# Lệnh xóa volume trong container là docker rm -fv mysql
+#docker run -d -v $PWD/mysql_data_folder:var/lib/mysql --name mysql2 -e "MYSQL_ROOT_PASSWORD=12345678" mysql:5.7
+# Câu lệnh list volume: docker volume ls
+
+#dangling volume:
+khi tạo volume xong xóa các container 
+mà vẫn còn volume thì gọi là dangling volume (các volume mà không có gán container)
+docker run -dti -v /mnt --name test centos
+docker rm -fv test
+#Câu lệnh lọc dangling volume
+docker volume ls -f=dangling=true -q 
+#Câu lệnh remove docker dangling
+docker volume rm $(docker volume ls -f=dangling=true -q)

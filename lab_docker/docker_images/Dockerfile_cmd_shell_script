@@ -1,0 +1,26 @@
+FROM centos:7
+
+RUN yum install httpd unzip -y
+
+LABEL maintainer="Sonnh"
+
+LABEL vendor="companyA"
+
+LABEL random="abc"
+
+ENV HTML example-webpage
+
+WORKDIR /var/www/html/
+
+ADD https://github.com/seanmiles/example-webpage/archive/refs/heads/gh-pages.zip ./code.zip
+
+RUN unzip code.zip && mv $HTML-gh-pages/* . && echo $HTML > ./env.html
+
+RUN useradd application && chown application:application /var/www/html -R
+USER application
+RUN rm -rf code.zip $HTML-gh-pages
+USER root
+COPY cmd.sh /cmd.sh
+RUN chmod 777 /cmd.sh
+
+CMD /cmd.sh

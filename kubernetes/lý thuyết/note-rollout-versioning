@@ -1,0 +1,39 @@
+khi deploy lần đầu sẽ tạo ra phiên bản (version) đầu tiên
+Trong tương lại khi ứng dụng được nâng cấp thì một đợt phát hành mới sẽ được kích hoạt và một bản sửa đổi triển khai
+mới được tạo có tên là bản sửa đổi 2
+# Roll out command
+kubectl rollout status deployment/myapp-deployment
+# xem trạng thái rollout hiện tại của deployment
+
+# Để xem lịch sử rollout deployment
+kubectl rollout history deployment/myapp
+
+# Deployment có 2 strategy là "recreate" và "rollingupdate"
+
+recreate là tạo mới lại toàn bộ phiên bản trước đó
+Điều này sẽ dẫn đến ứng dụng sẽ ngưng hoạt động trong thời gian recreate
+
+rollingupdate sẽ update lần lượt one by one, giúp hệ thống không bị downtime
+
+CHiến lược mặc định nếu không cấu hình trên deployment là rollingupdate
+
+#Câu lệnh update version mới image sau khi đã apply deployment
+
+kubectl apply -f deployment-definition.yml
+
+kubectl set image deployment/myapp-deployment \nginx-container=nginx:1.9.1
+
+# Roll back
+Giả sử khi update thấy có lỗi. Muốn back về version cũ thì sử dụng rollback
+# Câu lệnh rollback lại version cũ
+kubectl rollout undo deployment/myapp-deployment
+
+#Lưu lại trạng thai deployment
+kubectl create -f deployment.yaml --record
+# option --record để lưu lại version, dùng trong trường hợp rollback version
+
+# edit rồi record version
+kubectl edit deployment myapp-deployment --record
+# 1 cách set version khác
+kubectl set image deployment myapp-deployment nginx=nginx:1.18-perl --record
+

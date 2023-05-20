@@ -1,0 +1,8 @@
+2 chức năng chính:
+1. Watch status (monitor status của các node thông qua kube api)
+2. Remediate Situation ( thực hiện đồng bộ cần thiết để khắc phục tình hình)
+node monitor mỗi 5s
+node sẽ đợi 40s trước khi đánh giấu là không thể truy cập được
+Sau bị đánh dấu là không thể truy cập, nó sẽ cho 5 phút để quay lại. Không được sẽ remove pod đó 
+Và create lại pod mới, sao chép nd thông tin sang pod mới
+
