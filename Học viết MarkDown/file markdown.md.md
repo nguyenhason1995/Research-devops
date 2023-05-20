@@ -9,3 +9,6 @@ echo alala
 ```
 
 [link](www.google.com)
+\*text*
+\test thử xem ntn
+
