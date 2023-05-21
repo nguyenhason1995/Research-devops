@@ -13,3 +13,4 @@ echo alala
 ### \*text*
 ### \test thử xem ntn
 
+### <!--This is a comment -->
