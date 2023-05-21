@@ -1,0 +1,14 @@
+câu lệnh list các pod có trong các namespace. Sử dụng khi cần tìm 1 pod nào đó
+
+kubectl get pods --all-namespace
+ hoặc sử dụng câu lệnh 
+ kubectl get pods -A 
+
+ Sử dụng dnsname để connect tới sv của namespace khác
+ mysql.connect(db-service.dev.svc.cluster.local)
+ trong đó cluster.local là tên domain 
+ svc: miền phụ cho dịch vụ 
+ dev: namespace
+ db-service: service name 
+ db-serice này có thể thay bằng địa chỉ IP nhưng ở dạng này (192-168-1-2)
+ 
