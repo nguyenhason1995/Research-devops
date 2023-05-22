@@ -84,7 +84,61 @@ server {
 ```php
 nginx -s reload
 ```
-* Trong trường hợp không hoạt động như kỳ vọng, bạn có thể tìm log trong error.log và access.log trong đường dẫn `/usr/local/nginx/logs hay /var/log/nginx.
+* Trong trường hợp không hoạt động như kỳ vọng, bạn có thể tìm log trong error.log và access.log trong đường dẫn `/usr/local/nginx/logs` hay `/var/log/nginx`.
+
+# Thiết lập một Proxy Serve đơn giản
+* Một trong những thiết lập hay sử dụng trong nginx như là một proxy serve, có nghĩa là một server nhận request, và chuyển chúng đến server đã đc proxy, lọc response từ chúng, và gửi đến client. 
+
+* Chúng ta sẽ cấu hình 1 server proxy cơ bản, phục vụ các yêu cầu về hình ảnh với các tệp file từ đường dẫn local và gửi tất cả những request để là 1 proxy server. Trong ví dụ này, cả 2 máy chủ được định nghĩa trên 1 nginx 
+
+* Đầu tiên, định nghĩa proxy server là add thêm server block trong file nginx config với các nội dung dưới đây:
+```php
+server {
+    listen 8080;
+    root /data/up1;
+
+    location / {
+    }
+}
+```
+Đó sẽ là một server đơn giản lắng nghe ở port 8080(trước đó, listen directive không được chỉ rõ từ khi port 80 đc sử dụng) và map tới tất cả các request đến `/data/up1` trên local. Tạo thư mục và để  file index.html và nó. Lưu ý rằng `root` directive được đặt trong `server` context. `root` directive được sử dụng khi `location` block đã lựa chọn để phục vụ 1 request không bao gồm `root` directive
+
+* Tiếp theo đó, sử dụng cấu hình server từ section trước đó và sửa nó để tạo 1 cấu hình proxy server. Trong `location` block đầu tiên, đặt directive `proxy_pass` directive với protocol, name và port của proxy_server được chỉ rõ trong parameter (trong trường hợp này, nó là http://localhost:8080)
+
+```php
+server {
+    location / {
+        proxy_pass http://localhost:8080;
+    }
+
+    location /images/ {
+        root /data;
+    }
+}
+```
+* Chúng ta sẽ sửa `location` block thứ 2, cái hiện tại map request với `/images/` đến đường dẫn dưới `/data/images`, để làm cho nó phù hợp với yêu cầu của `images` với phần mở rộng. Khối này sau khi sửa sẽ ntn:
+```php
+location ~ \.(gif|jpg|png)$ {
+    root /data/images;
+}
+```
+* prameter khớp với URI kết thúc bằng .gif, .jpg hoặc .png. Một biểu thức hợp quy nên đặt trước ~. Các yêu cầu tương ứng sẽ ánh xạ dến `/data/images`
+
+* Khi nginx lựa chọn một `location` block đến 1 serve request đầu tiên nó sẽ kiểm tra `location` directive, nhớ rằng `location` với prefix dài nhất, và sau đó check regular expression. Nếu match với regular expression, nginx chọn `location` hay nếu không , nó sẽ chọn 1 cái nhớ trước đó. 
+
+* Kết quả là file cấu hình sẽ trông ntn:
+```php
+server {
+    location / {
+        proxy_pass http://localhost:8080/;
+    }
+
+    location ~ \.(gif|jpg|png)$ {
+        root /data/images;
+    }
+}
+```
+Server đó sẽ lọc request kết thúc với .gif, .jpg, or .png và map chúng đến `data/images` và pass tất cả các request đến đến server phía trên.
 
 
 

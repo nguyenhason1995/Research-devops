@@ -1,0 +1,8 @@
+Tìm pod có lable env=dev
+kubectl get pods --selector env=dev
+
+Tìm label bao gồm pod, replicaset,deployment và các object khác.
+kubectl get all --selector env=prod --no-headers
+
+Tìm pod có nhiều labels
+kubectl get all --selector env=prod,bu=finance,tier=frontend
