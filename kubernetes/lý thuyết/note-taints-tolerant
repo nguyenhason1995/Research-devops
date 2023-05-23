@@ -1,0 +1,10 @@
+# taints - node
+kubectl taint nodes node-name key=value:taint-effect
+
+kubectl taint nodes node01 app=blue:NoSchedule
+
+# Có 3 hiệu ứng taint node:
+NoSchedule, PreferNoSchedule, NoExcute
+
+# tham khảo tài liệu này
+https://viblo.asia/p/kubernetes-series-bai-17-advanced-scheduling-taints-and-tolerations-924lJBDalPM

@@ -1,0 +1,16 @@
+ví dụ tài nguyên có 3 node, trong đó có 1 node có tài nguyên lớn nhất
+Giả sử cần nhiều sử dụng nhiều tài nguyên. Nên chúng ta muốn chọn 1 node có resource lớn 
+
+cấu hình trong mục spec
+
+nodeSelector:
+    size: Large
+
+Để đánh dấu lên các node, sử dụng lệnh gán label
+
+kubectl label nodes <node-name> <label-key>=<label-value>
+# giả sử chúng ta cần cấu hình trên node 1
+kubectl label nodes node-1 size=Large
+
+# Tài liệu tham khảo hết trong đây
+https://viblo.asia/p/kubernetes-series-bai-18-advanced-scheduling-node-affinity-and-pod-affinity-gAm5y7jqZdb
