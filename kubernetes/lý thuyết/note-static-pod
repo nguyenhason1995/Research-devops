@@ -1,0 +1,41 @@
+static pod được cấu hình trong file /etc/manifest
+Mặc định, định kỳ kubelet sẽ quét file. Nên khi cáu hình file này k cần lệnh kubect apply
+chúng ta vẫn sẽ thấy thông tin pod được tại trên dasboard nhưng sẽ không thể điều khiển được 
+Lý do là kubelet trên node quản Lý
+# Dấu hiệu nhận biết static pod. Pod có tên Pod-name+hostname của node
+
+Để stop/delete static pod: Move file manifest của Pod ra khỏi thư mục static pod (/etc/kubernetes/manifests/)
+Để create/start static pod: Tạo file manifest vào thư mực static pod (/etc/kubernetes/manifests/)
+
+Xem thông tin cấu hình thư mục chứa static pod của kubelet
+Lấy thông tin config của service kubelet:
+sudo cat /etc/systemd/system/kubelet.service
+
+Như vậy kubelet được chạy với các tham số từ các biến môi trường được lưu ở file /etc/kubernetes/kubelet.env.
+Kiểm tra các biến môi trường:
+
+[sysadmin@viettq-worker1 system]$ sudo cat /etc/kubernetes/kubelet.env |grep config
+KUBELET_ARGS=--bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf \
+--config=/etc/kubernetes/kubelet-config.yaml \
+--kubeconfig=/etc/kubernetes/kubelet.conf \
+
+Ta sẽ xem config của kubelet ở file /etc/kubernetes/kubelet-config.yaml
+[sysadmin@viettq-worker1 system]$ sudo cat /etc/kubernetes/kubelet-config.yaml |grep static
+staticPodPath: /etc/kubernetes/manifests
+
+có thể thấy tham số staticPodPath chính là tham số khai báo thư mục chứa các static pod của node chạy kubelet này.
+
+# Lưu ý: chỉ có thể cấu hình pod trên đường dẫn /etc/kubernetes/manifests
+Khi tạo pod static trên node. chúng ta gõ lệnh kubect get pod trên master vẫn ra kết quả của pod trên wk vì, wk
+node trong cụm. Nó vẫn ánh xạ đến kube api
+
+# Tại sao lại sử dụng static node:
+- Sẽ tránh sự ảnh hưởng tới master node
+có thể sử dụng static pod để triển khai thành phần cấu tạo lên master node giống như pod trên node.
+
+cấu hình lên kubenetes cluster cũng sử dụng cơ chế static node này. Nên khi get pod ở namspace kube-system chúng
+ta sẽ thấy thành phần như là các pod.
+
+# Daemonset dùng để đảm bảo 1 instance trên application luôn có sẵn trên tất cả các node trong cluster 
+Nó sẽ được xử lý giống nhu daemonsets controler thông qua Api server 
+Còn static pod có thể tạo trực tiếp bởi kubelet mà không cần interface từ kube api server

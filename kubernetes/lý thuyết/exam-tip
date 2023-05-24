@@ -95,6 +95,8 @@ Both the above commands have their own challenges. While one of it cannot accept
 
 Apply the labels on node:
 kubectl label node node01 color=blue
+
+kubectl  replace --force -f /tmp/kubectl-edit-2867414168.yaml
 Reference:
 https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands
 

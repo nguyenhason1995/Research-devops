@@ -8,4 +8,6 @@ kubectl run redis --image=redis --dry-run=client -o yaml > redis.yaml
 kubectl apply -f redis.yaml
 # lệnh tạo file yaml
 kubectl create -f pod.yaml
+# lệnh tạo pod kèm command
+kubectl run static-busybox --image=busybox --dry-run=client -o yaml > busybox.yaml --command --sleep 1000 
 

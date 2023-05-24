@@ -1,0 +1,20 @@
+Nếu không đặt resource, limit (no resource, no limit)
+-> tiêu thụ tất cả tài nguyên trên cpu, sau đó sẽ chặn luôn memory
+
+Set (no request, nhưng set limit)
+Trong trường hợp này kubenetes tự động các request=limit
+
+Set request và set limit
+LÚc này CPU và mem sẽ tiêu thụ đến một ngưỡng đã set nhất định 
+
+Setup lý tưởng nhất là 
+set requets và không set limit
+Do không set limit nên pod sẽ tiêu thụ nhiều cpu nhất có thể, bất cứ thời điểm nào nếu yêu cầu bổ sung 
+CPU 
+-----
+behavior memory
+
+Hạn ngạch tài nguyên cho namespace
+
+kind: ResourceQuota
+

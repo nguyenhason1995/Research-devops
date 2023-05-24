@@ -1,0 +1,25 @@
+demonset giống replicaset vì nó sẽ triển khai nhiều phiên bản nhóm nhưng nó chạy một bản của mỗi pod trên
+mỗi node 
+
+bất cứ khi nào một nút mới được thêm vào cụm thì pod tự động cập nhật vào
+
+Khi node bị remove thì pod sẽ tự động remove theo 
+
+demonset đảm bảo rằng một bản sao của pod luôn hiện diện trong tất cả các node.
+
+Một số tác dụng của demonset là :
+Giả sử muốn monitor, thu thập log trên mỗi node 
+Một trong những thành phần worker node được yêu cầu trên mọi node wk là kube- proxy
+Đó là một trong những usecase của demonset để triển khai như một deamon set trong cụm
+
+các câu lệnh:
+kubectl get deamonsets
+kubectl describe deamonsets <name-deamonset>
+kubectl get daemonsets --all-namespaces
+
+để tạo daemonsets chúng ta sử dụng lệnh tạo kubectl run deployment....
+Sau đó sửa file deployment, đổi kind, xóa strategy và replicas
+
+# Daemonset dùng để đảm bảo 1 instance trên application luôn có sẵn trên tất cả các node trong cluster 
+Nó sẽ được xử lý giống nhu daemonsets controler thông qua Api server 
+
