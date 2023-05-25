@@ -1,6 +1,38 @@
+multi scheduler sử dụng 
+giả sử b có 1 ứng dụng cụ thể yêu cầu các thành phần của nó được đặt trên các node 
+sau khi thực hiện một số kiểm tra bổ sung 
+
+
+Nhiều bộ lập lịch
+Trong hướng dẫn này, chúng ta sẽ thảo luận về nhiều bộ lập lịch trong Kubernetes .
+
+Chúng tôi chủ yếu thảo luận về các cách khác nhau để lập lị
+ch POD thủ công trên một nút, cách xem các sự kiện liên quan đến lịch trình.
+
+Chạy nhiều bộ lập lịch trong Kubernetes
+Như chúng ta đã biết, bộ lập lịch trình mặc định có một thuật toán mô tả đồng đều
+ các POD trên các nút cũng như xem xét các điều kiện khác nhau mà chúng tôi chỉ định thông qua
+  các vết bẩn và dung sai cũng như mối quan hệ của nút , v.v.
+
+Nhưng nếu không cái nào trong số này đáp ứng nhu cầu của bạn thì sao?
+
+Giả sử bạn có một ứng dụng cụ thể yêu cầu các thành phần của nó được đặt 
+trên các nút sau khi thực hiện một số kiểm tra bổ sung.
+
+Vì vậy, bạn quyết định có thuật toán lập lịch trình của riêng mình để đặt 
+POD trên các nút. Vì vậy, bạn có thể thêm các điều kiện tùy chỉnh của riêng mình và kiểm tra trong đó.
+
+Kubernetes có khả năng mở rộng cao. Bạn có thể viết chương trình lập lịch 
+Kubernetes của riêng mình , đóng gói và triển khai nó dưới dạng bộ lập lịch mặc định hoặc
+ bộ lập lịch bổ sung trong cụm Kubernetes .
+
+Bằng cách đó, tất cả các ứng dụng khác có thể đi qua bộ lập lịch mặc định,
+ tuy nhiên, một ứng dụng cụ thể có thể sử dụng bộ lập lịch tùy chỉnh của bạn.
 sẽ có 2 file cấu hình
+
 1 file tạo pod scheduler 
-trong đó có file cấu hình trỏ đường dẫn config  --config=/etc/kubernetes/my-scheduler/my-scheduler-config.yaml
+trong đó có file cấu hình trỏ đường dẫn
+ config  --config=/etc/kubernetes/my-scheduler/my-scheduler-config.yaml
 
 file còn lại là file my-scheduler-config.yaml
 

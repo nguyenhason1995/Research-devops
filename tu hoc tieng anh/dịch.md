@@ -140,6 +140,27 @@ server {
 ```
 Server đó sẽ lọc request kết thúc với .gif, .jpg, or .png và map chúng đến `data/images` và pass tất cả các request đến đến server phía trên.
 
+# Cài đặt FastCGI Proxying
+
+* Nginx có thể được sử dụng để route request đến FastCGI server, nó chạy application với biến framework và ngôn ngữ lập trình như PHP.
+
+* Cấu hình nginx cơ bản để làm với FastCGI server bao gồm sử dụng  directive `fastcgi-pass` thay vì directive `proxy-pass`, và directive `fastcgi_param` để set parameter chuyển tới 1 server FastCGI. Giả sử server FastCGI truy cập `locahost:9000`. Nói về cấu hình proxy từ section trước 1 cách đơn giản. Thay thế directive `proxy-pass` với directive `fastcgi_pass` và thay parameter đến `locahost:9000`. Trong PHP, parameter SCRIPT_FILENAME được sử dụng để xác định script name, và parameter `QUERY_STRING` được sử dụng để chuyền parameter request. kết quả cấu hình mong muốn là:
+```php
+server {
+    location / {
+        fastcgi_pass  localhost:9000;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_param QUERY_STRING    $query_string;
+    }
+
+    location ~ \.(gif|jpg|png)$ {
+        root /data/images;
+    }
+}
+```
+Đó sẽ là setup 1 server nó sẽ route tất cả request ngoại trừ request từ static image đến hệ thống proxy server trên `localhost:9000` thông qua giao thức FastCGI
+ 
+
 
 
 
