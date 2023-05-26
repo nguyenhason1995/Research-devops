@@ -1,0 +1,18 @@
+ĐỂ monitor pod, node trong kubenetes thì phải cài metrics-server
+
+git clone https://github.com/kodekloudhub/kubernetes-metrics-server.git
+
+Sau đó chạy kubectl create -f .
+Lúc này mới sử dụng được câu lệnh monitor 
+# Monitor nodes:
+kubectl top node
+# Monitor pod:
+kubectl top pod
+.........
+# Managing Application logs:
+kubectl create -f event-simulator.yaml
+kubectl logs -f event-simulator-pod
+# Nếu có nhiều container trong pod thì phải chỉ định tên container cần monitor log
+kubectl logs -f event-simulator-pod event-simulator
+
+

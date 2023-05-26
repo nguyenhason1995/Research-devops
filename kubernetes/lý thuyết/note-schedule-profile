@@ -1,0 +1,8 @@
+Để thiết lập mức độ ưu tiên, trước tiên bạn phải tạo 1 lớp piority 
+khai báo trên `spec`
+piorityClassName: high-priority
+Đây là cách các pod có độ ưu tiên cao hơn sẽ đến đầu hàng đợi để được đặt lịch trước 
+Sau đó chúng ta sẽ đến với bước lọc. Đây là nơi các node không thể chạy pod được lọc ra 
+Các node không đủ điều kiện sẽ bị loại 
+Tiếp theo sẽ là node được chọn (các node đạt yêu cầu)
+Ở vòng này nó sẽ lọc tiếp đến khi chọn 1 node phù hợp nhất với các tiêu chí đưa ra là tốt nhất 
