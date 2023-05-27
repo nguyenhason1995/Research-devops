@@ -1,115 +1,153 @@
-# tao configmap 
-kubectl create configmap
-    <config-name> --from-literal=<key>=<value>
+# tao configmap bằng câu lệnh 
+kubectl create configmap sonnh5 --from-literal env=production --from-literal domain=sonnh5.com
+# Câu lệnh xem config map sonnh5
+ kubectl  get configmap sonnh5 -o yaml
+ # tạo configmap từ commandline và input từ một file
+cat config.properties 
 
-kubectl create configmap \
-    app-config --from-literal=APP_COLOR=blue
-               --from-literal=APP_MOD=prod
+env=devops
+domain=sonnh5.com
+password=ssss
+# tạo configmap từ file bằng câu lệnh sau 
+kubectl create configmap sonnh4 --from-file=/root/config.properties
 
-## tao configmap bang file
+# Tạo configmap với Yaml Manifest
+vim configmap.yaml
 
-kubectl create configmap
-    <config-name> --from-file=<path-to-file>
-
-
-kubectl create configmap
-     app-config --from-file=app_config.properties
-
-# file yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: game-demo
+  name: myconfigmap
 data:
-  # property-like keys; each key maps to a simple value
-  player_initial_lives: "3"
-  ui_properties_file_name: "user-interface.properties"
+  database: mongodb
+  database_uri: mongodb://localhost:27017
+  mysqld_config: |-
+    [mysqld]
+    tmp_table_size = 128M
+    max_heap_table_size = 32M
+    key_buffer_size = 16M
+    max_allowed_packet = 64M
+    table_on_cache = 600
+    table_on = 1024
+    
+kubectl apply -f configmap.yaml 
 
-  # file-like keys
-  game.properties: |
-    enemy.types=aliens,monsters
-    player.maximum-lives=5    
-  user-interface.properties: |
-    color.good=purple
-    color.bad=yellow
-
-# Pod map configmap
+# Sử dụng configmap với Pod kubernetes
+# load toàn bộ key-value data của configmap thành biến môi trường 1 pod app.
 apiVersion: v1
-
 kind: Pod
-
 metadata:
-
-  name: configmap-demo-pod
-
+  name: myapp
+  labels:
+    name: myapp
 spec:
-
   containers:
+  - name: myapp
+    image: busybox
+    command: [ "/bin/sh", "-c", "env"]
+    envFrom:
+      - configMapRef:
+          name: myconfigmap
 
-    - name: demo
-
-      image: alpine
-
-      command: ["sleep", "3600"]
-
-      env:
-
-        # Define the environment variable
-
-        - name: PLAYER_INITIAL_LIVES # Notice that the case is different here
-
-                                     # from the key name in the ConfigMap.
-
-          valueFrom:
-
-            configMapKeyRef:
-
-              name: game-demo           # The ConfigMap this value comes from.
-
-              key: player_initial_lives # The key to fetch.
-
-        - name: UI_PROPERTIES_FILE_NAME
-
-          valueFrom:
-
-            configMapKeyRef:
-
-              name: game-demo
-
-              key: ui_properties_file_name
-
-      volumeMounts:
-
-      - name: config
-
-        mountPath: "/config"
-
-        readOnly: true
-
-  volumes:
-
-  # You set volumes at the Pod level, then mount them into containers inside that Pod
-
-  - name: config
-
-    configMap:
-
-      # Provide the name of the ConfigMap you want to mount.
-
-      name: game-demo
-
-      # An array of keys from the ConfigMap to create as files
-
-      items:
-
-      - key: "game.properties"
-
-        path: "game.properties"
-
-      - key: "user-interface.properties"
-
-        path: "user-interface.properties"
-
+# Load một giá trị biến môi trường được khai báo trong pod từ Configmap key cụ thể
+apiVersion: v1
+kind: Pod
+metadata:
+  name: myapp
+  labels:
+    name: myapp
+spec:
+  containers:
+  - name: myapp
+    image: busybox
+    command: [ "/bin/sh", "-c", "env"]
+    env:
+      - name: DATABASE_URI
+      valueFrom: 
+        configMapKeyRef:
+          name: myconfigmap
+          key: database_uri
         
+# Hoặc b có thể mount volume file config trong app container từ Configmap
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql-sonnh5
+spec:
+  selector:
+    matchLabels:
+      app: myapp
+  template:
+    metadata:
+      labels:
+        app: mysql-sonnh5
+    spec:
+      containers:
+      - name: mysql-sonnh5
+        image: mysql:5.7
+        ports:
+          - 3306
+        volumeMounts:
+          - name: mysql-config
+            mountPath: /etc/mysql/conf.d
+       volumes:
+          -name: mysql-config
+           configMap: 
+              name: myconfigmap
+              item: 
+                -key: mysqld_config 
+
+# Một ví dụ khác:
+# tạo một file tên là nginx-config-cm.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config
+data:
+  my-nginx-config.conf: |
+    server {
+      listen 80;
+      server_name www.kubia-example.com;
+
+      gzip on;
+      gzip_types text/plain application/xml;
+
+      location / {
+        root /usr/share/nginx/html;
+        index index.html index.htm;
+      }
+    }
+
+# Tạo một fiel tên là pod-nginx.yaml với config như sau:
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+spec:
+  containers:
+    - image: nginx:alpine
+      name: web-server
+      volumeMounts:
+        - mountPath: /etc/nginx/conf.d # mount content of the configmap to container
+          name: config
+          readOnly: true
+  volumes:
+    - name: config # volume use configmap as content
+      configMap:
+        name: nginx-config # configmap name
+
+
+
+
+
+
+
+
+# Tài liệu tham khảo:
+https://viblo.asia/p/tao-va-su-dung-configmaps-trong-kubernetes-07LKXk8P5V4
+https://viblo.asia/p/kubernetes-series-bai-8-configmap-and-secret-truyen-cau-hinh-vao-container-RQqKL6rrl7z
+https://cuongquach.com/cau-hinh-configmap-kubernetes.html
+
+
         
      
