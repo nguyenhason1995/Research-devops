@@ -1,0 +1,51 @@
+Trong một Pod chứa nhiều container, mỗi container được kỳ vọng chạy một tiến trình tồn tại cùng với vòng đời
+
+ của Pod. Ví dụ, trong một Pod với ứng dụng web và một agent ghi log, cả hai container đều phải hoạt động suốt thời gian. Tiến trình chạy trong container ghi log được kỳ vọng tồn tại cùng với việc chạy ứng dụng web. Nếu bất kỳ container nào gặp lỗi, Pod sẽ khởi động lại.
+
+Tuy nhiên, đôi khi bạn muốn chạy một tiến trình chỉ chạy đến khi hoàn thành trong một container. Ví dụ, một
+
+ tiến trình tải mã nguồn hoặc tập tin nhị phân từ kho lưu trữ sẽ được sử dụng bởi ứng dụng web chính. Đó là một tác vụ chỉ chạy một lần khi Pod được tạo lần đầu. Hoặc một tiến trình chờ một dịch vụ hoặc cơ sở dữ liệu bên ngoài trước khi ứng dụng chính bắt đầu. Đó là lúc initContainer xuất hiện.
+
+Một initContainer được cấu hình trong Pod giống như tất cả các container khác, ngoại trừ việc nó được chỉ 
+
+định trong phần initContainers, như sau:
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: myapp-pod
+  labels:
+    app: myapp
+spec:
+  containers:
+  - name: myapp-container
+    image: busybox:1.28
+    command: ['sh', '-c', 'echo The app is running! && sleep 3600']
+  initContainers:
+  - name: init-myservice
+    image: busybox
+    command: ['sh', '-c', 'git clone <some-repository-that-will-be-used-by-application> ; done;']
+
+Khi một Pod được tạo lần đầu, initContainer sẽ được chạy, và tiến trình trong initContainer phải chạy cho đến khi hoàn thành trước khi container thực sự chứa ứng dụng bắt đầu.
+
+Bạn cũng có thể cấu hình nhiều initContainers như vậy, tương tự như cách chúng ta đã làm với Pod chứa nhiều container. Trong trường hợp này, mỗi initContainer được chạy một lần duy nhất theo thứ tự tuần tự.
+
+Nếu bất kỳ initContainer nào không hoàn thành, Kubernetes sẽ khởi động lại Pod liên tục cho đến khi Init Container thành công.
+
+Ví dụ:
+
+yaml
+Copy code
+apiVersion: v1
+kind: Pod
+metadata:
+  name: myapp-pod
+  labels:
+    app: my
+
+
+
+
+Regenerate response
+
+Continue generating
