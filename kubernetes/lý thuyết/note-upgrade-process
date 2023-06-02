@@ -1,0 +1,61 @@
+upgrade trong kubernetes
+kube apiserver: sẽ có phiên bản cao nhất (phiên bản x)
+Tiếp theo là Scheduler sẽ có phiên bản thấp hơn kube apiserver (phiên bản x-1)
+Controller Manager (phiên bản x-1)
+kubelet và kube-proxy (phiên bản x-2)
+
+kubectl (phiên bản x+1 hoặc x-1)
+
+upgrade kubedm
+
+# Sử dụng lệnh sau:
+kubeadm upgrade plan
+
+kubeadm upgrade apply
+
+# upgrade worker node
+
+Có 3 cách để upgrade workernode: 
+
+Cách 1: upgrade toàn bộ workernode cùng 1 lúc
+- Nhược điểm dễ nhận ra khi upgrade cùng 1 lúc thì các pod trong workernode sẽ down
+cách hoạt động của người dùng sẽ không thể truy cập được ứng dụng nữa.
+Sau quá trình nâng cấp các pod mói được Schedule lại
+
+Cách 2: upgrade từng node một 
+- Chuyển các pod sang 1 node khác sau đó upgrade lần lượt
+- Sau khi upgrade xong, các pod sẽ chuyển lại vào node.
+
+Cách 3: sẽ thêm một node mới vào (phiên bản mới hơn x+1)
+Sau đó sẽ nâng cấp dần dần và xóa các node cũ
+..............................................
+
+upgrade cụm kubedm từ 1.11 lên 1.13
+# Step 1: 
+kubeadm upgrade plan
+# Step 2: 
+apt-get upgrade -y kubeadm=1.12.0-00
+# Step 3:
+kubeadm upgrade apply v1.12.0
+# Step 4:
+upgrade kubelet:
+apt-get upgrade -y kubelet=1.12.0--00
+systemclt restart kubelet
+# Step 5:
+Check cụm bằng lệnh 
+kubectl get nodes
+# Step 6: 
+upgrade worker node
+# chúng ta phải drain node 
+kubectl drain node-1 
+# Sau đó các pod sẽ được di chuyển sang node khác
+# Sau khi drain thì dùng lệnh upgrade 
+apt-get upgrade -y kubeadm=1.12.0-00 
+apt-get upgrade -y kubelet=1.12.0-00
+kubeadm upgrade node config --kubelet-version v1.12.0
+systemclt restart kubelet
+kubectl uncordon node-1
+(lúc này node có thể được Schedule)
+  
+
+

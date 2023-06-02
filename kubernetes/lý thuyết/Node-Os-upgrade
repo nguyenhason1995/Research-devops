@@ -1,0 +1,57 @@
+# để loại bỏ 1 node ra khỏi Cluster
+kubectl drain node-1
+
+kubectl drain node01 --ignore-daemonsets 
+
+## Sử dụng tùy chọn bổ sung: Kubernetes cung cấp các tùy chọn bổ sung trong quá trình drain node như --force để buộc di chuyển Pod mà không quan tâm đến tình trạng hoàn thành công việc của chúng. Tuy nhiên, cần cẩn thận khi sử dụng tùy chọn này để không làm mất dữ liệu hoặc gây gián đoạn không cần thiết.
+
+kubectl drain node01 --ignore-daemonsets --force
+
+Dùng cách này nó sẽ xóa các pod vĩnh viễn không được sự quản lý của replicaset, job, daemonset hay statefulSet
+
+# Drain node để làm gì :
+
+Quá trình drain node trong k8s được sử dụng để thực hiện tác vụ như bảo trì, thay thế hoặc nâng cáp 1 node trong cụm k8s. Khi drain node, các pod đang chạy trên node sẽ được di chuyển sang node khác trong cụm. Dưới đây là một số trường hợp mà việc drain node có thể được sử dụng:
+
+- Bảo trì và nâng cấp: Khi bạn cần thực hiện bảo trì hoặc nâng cấp cho node, bạn có thể drain node để đảm bảo rằng không có Pod nào đang chạy trên node đó. Sau đó, bạn có thể tiến hành các công việc bảo trì hoặc nâng cấp mà không ảnh hưởng đến sự liên tục của ứng dụng.
+
+- Loại bỏ node khỏi cụm: Khi bạn muốn xóa bỏ một node khỏi cụm Kubernetes, ví dụ như khi bạn không cần thiết, muốn thay thế hoặc đổi cấu hình, bạn có thể drain node trước khi xóa nó khỏi cụm. Quá trình drain node đảm bảo rằng tất cả các Pod trên node đã được di chuyển an toàn đến các node khác trước khi xóa node.
+
+- Kiểm tra tải và cân bằng tải: Khi bạn muốn kiểm tra tải của các node trong cụm hoặc thực hiện cân bằng tải, bạn có thể drain một node để di chuyển các Pod khỏi node đó. Sau đó, bạn có thể quan sát hiệu suất và phân phối lại các Pod trên các node khác để đạt được cân bằng tải tốt hơn.
+
+- Tạm dừng lưu lượng: Khi bạn drain một node, Kubernetes sẽ tạm dừng lưu lượng đến node đó. Điều này đảm bảo rằng không có lưu lượng mới được định tuyến đến node trong quá trình drain, nhưng các kết nối hiện có vẫn được phục vụ cho đến khi chúng kết thúc hoặc bị đóng.
+
+- Tùy chọn sử dụng tài nguyên: Bạn có thể sử dụng các tùy chọn khi drain node để quyết định cách Kubernetes sẽ di chuyển Pod. Ví dụ: bạn có thể chỉ định Kubernetes di chuyển tất cả các Pod trên node bằng cách sử dụng tùy chọn --ignore-daemonsets. Điều này sẽ bỏ qua DaemonSet, một loại tài nguyên đặc biệt trong Kubernetes, và di chuyển các Pod khác đi.
+ 
+ - Cơ chế di chuyển Pod: Kubernetes sử dụng cơ chế di chuyển Pod để đảm bảo rằng các Pod được di chuyển an toàn và không gây gián đoạn cho ứng dụng. Trong quá trình drain node, Kubernetes sẽ chạy các Pod mới trên các node khác và di chuyển dữ liệu và trạng thái của Pod từ node cũ sang node mới.
+
+ Trong Kubernetes, lệnh "cordon" được sử dụng để đánh dấu một node là "không sẵn sàng" cho việc chạy các Pod mới. Tuy nhiên, nó không di chuyển các Pod đang chạy trên node đó như quá trình drain node.
+
+Khi bạn sử dụng lệnh "cordon" trên một node, Kubernetes sẽ ngăn các Pod mới được lên lịch chạy trên node đó. Các Pod hiện có vẫn tiếp tục chạy và không bị ảnh hưởng. Mục đích chính của việc sử dụng "cordon" là đảm bảo rằng không có Pod mới được triển khai lên node nào đang cordon, nhưng các Pod hiện có vẫn tiếp tục chạy.
+
+Điều này có thể hữu ích khi bạn muốn kiểm tra tải của các node trong cụm hoặc thực hiện một số tác vụ nhất định trên node mà không ảnh hưởng đến các Pod đang chạy trên đó.
+
+Để cordon một node trong Kubernetes, bạn có thể sử dụng lệnh kubectl như sau:
+
+php
+Copy code
+kubectl cordon <node_name>
+Ví dụ, để cordon một node có tên là "node-1", bạn có thể chạy lệnh:
+
+Copy code
+kubectl cordon node-1
+Sau khi node được cordon, Kubernetes sẽ không lên lịch chạy các Pod mới trên node này cho đến khi bạn gỡ bỏ đánh dấu cordon bằng lệnh kubectl uncordon:
+
+php
+Copy code
+kubectl uncordon <node_name>
+Ví dụ:
+
+Copy code
+kubectl uncordon node-1
+Việc sử dụng lệnh cordon giúp bạn kiểm soát việc triển khai Pod trên các node cụm Kubernetes một cách linh hoạt và đảm bảo rằng các tác vụ bảo trì hoặc kiểm tra tải không gây ảnh hưởng đến tính liên tục của ứng dụng.
+
+
+
+
+
