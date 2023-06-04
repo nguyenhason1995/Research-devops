@@ -1,0 +1,168 @@
+# Etcd:
+etcd là một cơ sở dữ liệu phân tán dùng để lưu trữ cấu hình, dữ liệu và trạng thái của hệ thống kubernetes.
+Nó là một thành phần quan trọng trong kiến trúc của kubernetes và được sử dụng để lưu trữ thông tin quan 
+trọng trong như cấu hình cuả các đối tượng Kubernetes, trạng thái của các pod, service, persitent Volume và nhiều thông tin khác.
+
+Việc sao lưu và khôi phục etcd là cần thiết để đảm bảo an toàn dữ liệu và khả năng khôi phục của hệ thống kubernetes. Dưới đây là một số lý do quan trọng:
+
+Bảo vệ dữ liệu: Sao lưu etcd giúp đảm bảo rằng dữ liệu quan trọng của hệ thống, bao gồm cấu hình và trạng thái của các đối tượng, được lưu trữ an toàn. Nếu xảy ra sự cố hoặc mất mát dữ liệu, bạn có thể khôi phục lại từ bản sao lưu để đảm bảo tính toàn vẹn và khả năng hoạt động của hệ thống.
+
+Khôi phục hệ thống: Trong trường hợp hệ thống gặp sự cố, bạn có thể sử dụng bản sao lưu etcd để khôi phục lại trạng thái trước đó của hệ thống. Điều này giúp giảm thiểu thời gian gián đoạn và đảm bảo rằng người dùng và ứng dụng không bị ảnh hưởng quá nhiều.
+
+Migrate hoặc nâng cấp hệ thống: Khi bạn muốn di chuyển hệ thống Kubernetes sang một cơ sở hạ tầng mới hoặc nâng cấp phiên bản Kubernetes, việc có bản sao lưu etcd cho phép bạn khôi phục lại trạng thái của hệ thống vào thời điểm trước khi thực hiện thay đổi. Điều này đảm bảo rằng không có dữ liệu quan trọng bị mất và hệ thống được chuyển đổi hoặc nâng cấp một cách an toàn.
+
+Disaster recovery: Sao lưu etcd là một phần quan trọng của chiến lược phòng ngừa thảm họa. Trong trường hợp xảy ra sự cố lớn như mất điện, hỏa hoạn hoặc hỏng hóc phần cứng, bạn có thể sử dụng bản sao lưu etcd để khôi phục lại hệ thống
+
+etcdctl là một công cụ dòng lệnh để tương tác với etcd, một cơ sở dữ liệu key-value. Trong tất cả các bài lab thực hành Kubernetes của chúng ta, cơ sở dữ liệu key-value ETCD được triển khai dưới dạng một static pod trên master node. Phiên bản được sử dụng là v3.
+
+Để sử dụng etcdctl cho các nhiệm vụ như sao lưu và khôi phục, hãy đảm bảo bạn đã đặt biến ETCDCTL_API thành 3.
+
+Bạn có thể làm điều này bằng cách xuất biến ETCDCTL_API trước khi sử dụng client etcdctl. Bạn có thể thực hiện như sau:
+
+## export ETCDCTL_API=3 (cách2)
+
+Trên master node:
+
+Để xem tất cả các tùy chọn cho một lệnh con cụ thể, hãy sử dụng cờ -h hoặc --help.
+
+Ví dụ, nếu bạn muốn tạo một bản snapshot của etcd, sử dụng:
+
+etcdctl snapshot save -h và ghi chú các tùy chọn toàn cầu bắt buộc.
+
+Vì cơ sở dữ liệu ETCD của chúng ta đã được kích hoạt TLS, các tùy chọn sau là bắt buộc:
+
+--cacert verify certificates of TLS-enabled secure servers using this CA bundle
+
+--cert identify secure client using this TLS certificate file
+
+--endpoints=[127.0.0.1:2379] Đây là mặc định vì ETCD đang chạy trên master node và được tiếp cận qua localhost 2379.
+
+--key identify secure client using this TLS key file
+
+Tương tự, sử dụng tùy chọn help cho lệnh khôi phục snapshot để xem tất cả các tùy chọn có sẵn cho việc khôi phục sao lưu.
+
+etcdctl snapshot restore -h
+
+Để biết thêm chi tiết về cách sử dụng công cụ dòng lệnh etcdctl và làm việc với các cờ -h, hãy xem video giải thích chi tiết cho Lab Backup và Restore.
+
+# backup ETCD:
+ETCDCTL_API=3 etcdctl --endpoints=https://[127.0.0.1]:2379 \
+--cacert=/etc/kubernetes/pki/etcd/ca.crt \
+--cert=/etc/kubernetes/pki/etcd/server.crt \
+--key=/etc/kubernetes/pki/etcd/server.key \
+snapshot save /opt/snapshot-pre-boot.db
+
+hoặc 
+export ETCDCTL_API=3
+
+etcdctl snapshot save --endpoints=127.0.0.1:2379 \
+--cacert=/etc/kubernetes/pki/etcd/ca.crt \
+--cert=/etc/kubernetes/pki/etcd/server.crt \
+--key=/etc/kubernetes/pki/etcd/server.key \
+/opt/snapshot-pre-boot.db
+
+Trong đó 4 dòng đầu là mặc định, /opt/snapshot-pre-boot.db là đường dẫn lưu file backup
+# restore ETCD
+ETCDCTL_API=3 etcdctl  --data-dir /var/lib/etcd-from-backup \
+snapshot restore /opt/snapshot-pre-boot.db
+
+hoặc
+
+export ETCDCTL_API=3
+
+etcdctl snapshot restore --data-dir /var/lib/etcd-from-backup /opt/snapshot-pre-boot.db
+
+sau đó vào thư mục `/etc/kubernetes/manifest/etcd.yaml` 
+
+sửa thư mục /hostPath 
+
+Path: /etc/kubernetes/pki/etcd
+
+# Có 2 dạng ETCD
+External ETCD và Stacked ETCD là hai cách triển khai ETCD trong môi trường Kubernetes khác nhau:
+
+External ETCD: Trong mô hình External ETCD, ETCD được triển khai và quản lý hoàn toàn bên ngoài cluster Kubernetes. Điều này có nghĩa là ETCD hoạt động độc lập với các thành phần khác của Kubernetes. ETCD có thể được triển khai trên các máy chủ riêng biệt hoặc trong một cụm ETCD riêng biệt. Trong trường hợp này, Kubernetes sử dụng giao thức gRPC để giao tiếp với ETCD và lưu trữ dữ liệu cấu hình và trạng thái của cụm Kubernetes trong ETCD. External ETCD cho phép tách biệt giữa việc quản lý ETCD và quản lý các thành phần khác của Kubernetes, và cho phép tùy chỉnh và mở rộng riêng lẻ từng phần.
+
+Stacked ETCD: Trong mô hình Stacked ETCD, ETCD được triển khai như một pod trong cluster Kubernetes, thường là trên các nút kiểm soát (control plane) của cluster. Trong trường hợp này, ETCD là một thành phần quan trọng của cụm Kubernetes và hoạt động cùng với các thành phần khác như kube-apiserver, kube-controller-manager và kube-scheduler. Stacked ETCD được triển khai dưới dạng các pod tĩnh (static pod) và được quản lý bởi kubelet trên mỗi nút kiểm soát. Stacked ETCD giúp đơn giản hóa việc triển khai và quản lý ETCD trong cụm Kubernetes, vì không cần phải quản lý ETCD riêng biệt và khớp cấu hình giữa ETCD và các thành phần khác.
+
+Tóm lại, External ETCD và Stacked ETCD là hai cách triển khai ETCD trong Kubernetes với cấu hình và quản lý khác nhau. External ETCD tách biệt ETCD và các thành phần khác của Kubernetes, trong khi Stacked ETCD tích hợp ETCD vào cụm Kubernetes như một thành phần quan trọng. Lựa chọn giữa hai phương pháp phụ thuộc vào yêu cầu và quyết định thiết kế cụm Kubernetes của bạn.
+
+## trường hợp external ETCD:
+# Để vào ETCD có 2 cách là ssh vào ip và ssh etcd-name
+ssh 10.1.193.3
+hoặc ssh etcd-server
+
+# Để xem data-dir của external ETCD 
+
+etcd-server ~ ➜  ps -ef | grep etcd
+
+# Để xem có bao nhiêu external ETCD. Ở command line ETCD
+
+etcd-server ~ ➜  ETCDCTL_API=3 etcdctl \
+ --endpoints=https://127.0.0.1:2379 \
+ --cacert=/etc/etcd/pki/ca.pem \
+ --cert=/etc/etcd/pki/etcd.pem \
+ --key=/etc/etcd/pki/etcd-key.pem \
+  member list
+
+dde391418d3ad6cb, started, etcd-server, https://192.26.203.18:2380, https://192.26.203.18:2379, false
+
+
+# ví dụ khác:
+
+ETCDCTL_API=3 etcdctl --endpoints=https://192.0.55.15:2379 --cacert=/etc/kubernetes/pki/etcd/ca.crt --cert=//etc/kubernetes/pki/etcd/server.crt --key=/etc/kubernetes/pki/etcd/server.key snapshot save /opt/cluster1.db
+# ví dụ backup external etcd
+Step 1. Copy the snapshot file from the student-node to the etcd-server. In the example below, we are copying it to the /root directory:
+
+student-node ~  scp /opt/cluster2.db etcd-server:/root
+cluster2.db                                                                                                        100% 1108KB 178.5MB/s   00:00    
+
+student-node ~ ➜  
+
+
+Step 2: Restore the snapshot on the cluster2. Since we are restoring directly on the etcd-server, we can use the endpoint https:/127.0.0.1. Use the same certificates that were identified earlier. Make sure to use the data-dir as /var/lib/etcd-data-new:
+
+etcd-server ~ ➜  ETCDCTL_API=3 etcdctl --endpoints=https://127.0.0.1:2379 --cacert=/etc/etcd/pki/ca.pem --cert=/etc/etcd/pki/etcd.pem --key=/etc/etcd/pki/etcd-key.pem snapshot restore /root/cluster2.db --data-dir /var/lib/etcd-data-new
+{"level":"info","ts":1662004927.2399247,"caller":"snapshot/v3_snapshot.go:296","msg":"restoring snapshot","path":"/root/cluster2.db","wal-dir":"/var/lib/etcd-data-new/member/wal","data-dir":"/var/lib/etcd-data-new","snap-dir":"/var/lib/etcd-data-new/member/snap"}
+{"level":"info","ts":1662004927.2584803,"caller":"membership/cluster.go:392","msg":"added member","cluster-id":"cdf818194e3a8c32","local-member-id":"0","added-peer-id":"8e9e05c52164694d","added-peer-peer-urls":["http://localhost:2380"]}
+{"level":"info","ts":1662004927.264258,"caller":"snapshot/v3_snapshot.go:309","msg":"restored snapshot","path":"/root/cluster2.db","wal-dir":"/var/lib/etcd-data-new/member/wal","data-dir":"/var/lib/etcd-data-new","snap-dir":"/var/lib/etcd-data-new/member/snap"}
+
+etcd-server ~ ➜  
+
+
+Step 3: Update the systemd service unit file for etcdby running vi /etc/systemd/system/etcd.service and add the new value for data-dir:
+
+[Unit]
+Description=etcd key-value store
+Documentation=https://github.com/etcd-io/etcd
+After=network.target
+
+[Service]
+User=etcd
+Type=notify
+ExecStart=/usr/local/bin/etcd \
+  --name etcd-server \
+  --data-dir=/var/lib/etcd-data-new \
+---End of Snippet---
+
+
+Step 4: make sure the permissions on the new directory is correct (should be owned by etcd user):
+
+etcd-server /var/lib ➜  chown -R etcd:etcd /var/lib/etcd-data-new
+
+etcd-server /var/lib ➜ 
+
+
+etcd-server /var/lib ➜  ls -ld /var/lib/etcd-data-new/
+drwx------ 3 etcd etcd 4096 Sep  1 02:41 /var/lib/etcd-data-new/
+etcd-server /var/lib ➜ 
+
+
+Step 5: Finally, reload and restart the etcd service.
+
+etcd-server ~/default.etcd ➜  systemctl daemon-reload 
+etcd-server ~ ➜  systemctl restart etcd
+etcd-server ~ ➜  
+
+
+Step 6 (optional): It is recommended to restart controlplane components (e.g. kube-scheduler, kube-controller-manager, kubelet) to ensure that they don't rely on
