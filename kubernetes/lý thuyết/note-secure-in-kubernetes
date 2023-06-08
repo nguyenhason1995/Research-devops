@@ -1,0 +1,511 @@
+# Khóa bất đối xứng:
+Sử dụng 1 cặp khóa bất đối xứng gồm khóa private key và public key(public lock). private key phải giữ bí mật không cho ai được biết còn public key thì không cần bảo mật. Mấu chót ở đây là nếu mã hóa hoặc khóa dữ liệu bằng khóa của mình, bạn chỉ có thể mở nó bằng khóa được liên kết. 
+# ví dụ: 
+Sinh khóa: 
+ssh-keygen
+Nó tạo ra 2 tệp public key và private key.id_rsa là private key, id_rsa.pub là public key.
+Sau đó khóa truy cập vs khóa công khai trên server cần bảo mật
+chỉ có thể đăng nhập vào server với private key
+# Để tránh hacker giả mạo web thì phải có CA (chứa thông tin để xác thực)
+# Để xác thực CA thì cần chữ ký  
+
+# TLS:
+
+Thông thường các chứng chỉ có khóa công khai được đặt tên là .crt hoặc phần mở rộng .pem
+key.pem hoặc .key cho chứng chỉ máy khách và khóa riêng 
+
+Trong k8s, tất cả đều đi qua api server. Kết nối từ bất cứ đâu đến api-server cần phải có chứng chỉ 
+để xác thực.
+# Server Certificates for server:
+- kube api-server: gồm apiserver.crt và apiserver.key
+- etcd-server: gồm etcd.crt và etcd.key
+- kubelet-server: gồm kubelet.crt và kubelet.key
+# Client Certificates for client:
+client truy cập vào api-server là các quản trị viên (administrator). admin yêu cầu 1 chứng chỉ và key pair
+để bảo mật đến kube-api server. Chúng ta gọi là admin.crt và admin.key
+- Scheduler gọi đến kube-api server để tìm kiếm pod yêu cầu được schedule lên. Và sau đó lấy API server để schedule pod. Scheduler là 1 client nó truy cập đến kube-apiserver
+- kube control manager: gồm controller-manager.crt và controler-manager.key
+- kube proxy: gồm kube-proxy.crt, kube-proxy.key
+# CA (certificate authority)
+- Chúng ta cần 1 cơ quan cấp chứng chỉ để ký tất cả các chứng chỉ này. 
+- kubernetes yêu cầu phải có it nhất một tổ chức phát hành chứng chỉ cho cụm của bạn
+######
+Để sử dụng TLS trong Kubernetes, bạn cần cấu hình và triển khai các thành phần và tài nguyên liên quan. Dưới đây là các bước cơ bản để sử dụng TLS trong Kubernetes:
+
+Tạo chứng chỉ TLS:
+
+Bước đầu tiên là tạo các chứng chỉ TLS. Bạn có thể tự ký chứng chỉ hoặc sử dụng một Certificate Authority (CA) để ký chứng chỉ cho bạn. Đảm bảo chứng chỉ bao gồm khóa công khai (public key) và khóa riêng tư (private key).
+Cấu hình Kubernetes API Server:
+
+Cấu hình API Server để sử dụng TLS. Bạn cần chỉ định các chứng chỉ TLS, bao gồm đường dẫn tới khóa công khai và khóa riêng tư, cùng với các tùy chọn khác như mật khẩu, mã hóa, và phương thức xác thực.
+Cấu hình các thành phần khác:
+
+Cấu hình các thành phần khác trong cụm như kubelet, etcd, và các controllers để sử dụng TLS. Tương tự như API Server, bạn cần chỉ định các chứng chỉ TLS và các tùy chọn bảo mật khác cho từng thành phần.
+Quản lý chứng chỉ và tái ký:
+
+Đảm bảo việc quản lý chứng chỉ TLS, bao gồm tái ký chúng khi chúng hết hạn. Kubernetes cung cấp API Certificates để tạo, xem, và tái ký chứng chỉ. Bạn có thể sử dụng công cụ như cert-manager để tự động hóa quá trình quản lý chứng chỉ.
+Kết nối TLS cho Ingress:
+
+Nếu bạn sử dụng Ingress để quản lý lưu lượng vào cụm, bạn có thể cấu hình Ingress Controller để hỗ trợ kết nối TLS. Điều này cho phép mã hóa dữ liệu truyền qua mạng giữa Ingress Controller và các dịch vụ backend.
+Các bước cụ thể và cấu trúc cấu hình sẽ phụ thuộc vào phần mềm và công cụ bạn sử dụng để triển khai Kubernetes, cũng như yêu cầu bảo mật của bạn. Bạn có thể tìm hiểu thêm thông qua tài liệu hướng dẫn của Kubernetes hoặc các nguồn tài nguyên khác như blog và sách về chủ đề này.
+
+# Sinh khóa
+# Generate key: sinh khóa riêng ca.key
+
+openssl genrsa-out ca.key 2048
+
+# Sau đó chúng tôi sẽ dùng lệnh sau để yêu cầu SSL mở cùng vs khóa được tạo để tạo yêu cầu chữ ký 
+
+openssl req -new -key ca.key -subj "/CN=KUBERNETES-CA" -out ca.crs
+
+# Ký chứng chỉ 
+
+openssl x509 -req -in ca.csr -signkey ca.key -out ca.crt (ký từ cert-file)
+####
+# Tạo chứng chỉ khách hàng
+
+# Tạo admin user:
+open genrsa -out admin.key 2048
+# Certificate signing request 
+open req -new -key admin.key -subj \ "/CN=kube-admin" -out admin.crs
+# Sign Certificate:
+openssl x509 -req -in admin.crs -CA ca.crt -CAkey ca.key -out admin.crt
+.......
+# về phía server
+# ETCD Server
+# Để tạo chứng chỉ cho ETCD:
+# Để tạo chứng chỉ cho api-server
+openssl genrsa -out apiserver.key 2048
+openssl req -new -key apiserver.key -subj \"/CN=kube-apiserver" -out apiserver.csr
+# mở openssl.cnf và chỉ định các tên có thể kết nối vs api-server
+DNS.1 = kubernetes
+DNS.2 = kubernetes.default
+DNS.3 = kubernetes.default.svc
+DNS.4 = kubernetes.default.svc.cluster.local
+IP.1= 
+IP.2= 
+# cuối cùng ký chứng chỉ:
+openssl x509 -req -in apiserver.csr \ -CA ca.crt -CAkey ca.key -out apiserver.crt
+######
+# Cách xem chứng chỉ trên kubernetes
+
+Vào file manifest
+cat /etc/kubernetes/manifests/kube-apiserver.yaml
+# tra CN (common name) cấu hình trên api server
+What is the Common Name (CN) configured on the Kube API Server Certificate?
+
+openssl x509 -in /etc/kubernetes/pki/apiserver.crt -text
+
+What is the Common Name (CN) configured on the ETCD Server certificate?
+
+openssl x509 -in /etc/kubernetes/pki/etcd/server.crt -text
+
+How long, from the issued date, is the Kube-API Server Certificate valid for?
+
+ Run the command openssl x509 -in /etc/kubernetes/pki/apiserver.crt -text and check on the Expiry date.
+
+ How long, from the issued date, is the Root CA Certificate valid for?
+ 
+ Run the command openssl x509 -in /etc/kubernetes/pki/ca.crt -text and look for the validity.
+ ##
+ # Để tạo chứng chỉ cho phép 1 user có thể vào được cụm kubernetes
+ # Tạo khóa cho 1 người dùng là jane
+ open genrsa -out jane.key 2048
+ # Sau đó cô ấy sẽ gửi yêu cầu đến quản trị viên
+  Quản trị viên lấy khóa và tạo một đối tượng yêu cầu ký chứng chỉ
+ openssl req -new -key jane.key -subj "/CN=jane" -out jane.csr
+# Đối tượng yêu cầu chứng chỉ được tạo giống như bất kỳ đối tượng kubernetes nào khác , sử dụng tệp "jane-csr.yaml"
+cat jane.csr |base64 | tr -d "\n"
+Sau đó chuyển vào "request" trong jane-csr.yaml
+
+## Tạo user admin mới trên kubernetes
+# 1. A new member akshay joined our team. He requires access to our cluster. The Certificate Signing Request is at the /root location.
+controlplane ~ ➜  ls
+akshay.csr  akshay.key
+# Create a CertificateSigningRequest object with the name akshay with the contents of the akshay.csr file
+# As of kubernetes 1.19, the API to use for CSR is certificates.k8s.io/v1.
+# Please note that an additional field called signerName should also be added when creating CSR. For client # authentication to the API server we will use the built-in signer kubernetes.io/kube-apiserver-client.
+
+cat akshay.csr | base64 -w 0
+LS0tLS1CRUdJTiBDRVJUSUZJQ0FURSBSRVFVRVNULS0tLS0KTUlJQ1ZqQ0NBVDRDQVFBd0VURVBNQTBHQTFVRUF3d0dZV3R6YUdGNU1JSUJJakFOQmdrcWhraUc5dzBCQVFFRgpBQU9DQVE4QU1JSUJDZ0tDQVFFQXJpaVAzbDMxdTJEdEdkdnBoeXlvTUtwOVVkdy9lRy9KQWxTV3dyVHJWRXpNCk12bVhWV0U3ZXBnamoxZmJCbURKcVpTbnN5WWdQWU9BalNqQ09FYlZ0bVp2QnQwWUxkYVRPZVhyT0lEZFR1QkoKbjZLWUU0VVhQNmNpWUt0bjFYZkF5QnlYdzh1cWlYKzBWNk04Ym1sK2tWYWRLUE8xWWI1c25RUVRNbnREYlBNbQpaQmRZZDhjVFRjZHFIdWVQQmxSeXdqbXAvN2s4T1N3Si9ySHpjMkUrWktVNUdVT2F1TU5Mc0NjUDJhOWRsamZ0Cmdla1l6QjNyNXgzSDRzOCthOUViL1pSZjhnTHdpa0xzRTEwU1ZCN0wrbiszL3pDMTJtWWVkRHpCOGdPNTVsS3gKZnljT3JXbTYwd3ZIWjJYVkFGZkRaQmI0dkkxWlFXTTRSVHU3L053WlF3SURBUUFCb0FBd0RRWUpLb1pJaHZjTgpBUUVMQlFBRGdnRUJBQzROaGtTcWt0eElna2JuK2dRbmQ3ZjdpNUlPVnBjOGlSVlJrM1RkbmVuYWIra0EzTUVpCitzemlXOG56bHc0Y243RTZUZ2ZpMXJOVVRDOWxQMkkyTnlraFpad2VaQWlJME90N2FtMm83blhlSmwwRHdEVGwKV3laQXFBenBMNWFINjlmWW16amRxUHVGdHloaEd2akVVcDdWTldOTXZEbkpRUUNmdlZFdVhqMWVPeGVkeHVGLwpFR2dMS3dmemM5RFdoWGx3NDJNa1BGeldYbkRheW1zYVQ0QUd6VVhwWEgySGRhNG1qcUQ2ZTYxZ3ZQTjNSbmZMCnFlWFdrVTNTeFRoNk9od1N3QTR2a3g2TFV3VUhlNHBsbTRmcXhBay8zTHZ2WWNLOVhUWWxnY2hZY09SNUpRQkkKRXJUN3FkM2s4d29qclhnclJVT2RudDJXMmJvYS9xUCtIM2c9Ci0tLS0tRU5EIENFUlRJRklDQVRFIFJFUVVFU1QtLS0tLQo=
+
+Tạo file yaml cp từ k8s.io
+
+apiVersion: certificates.k8s.io/v1
+kind: CertificateSigningRequest
+metadata:
+  name: akshay
+spec:
+  request: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURSBSRVFVRVNULS0tLS0KTUlJQ1ZqQ0NBVDRDQVFBd0VURVBNQTBHQTFVRUF3d0dZV3R6YUdGNU1JSUJJakFOQmdrcWhraUc5dzBCQVFFRgpBQU9DQVE4QU1JSUJDZ0tDQVFFQXJpaVAzbDMxdTJEdEdkdnBoeXlvTUtwOVVkdy9lRy9KQWxTV3dyVHJWRXpNCk12bVhWV0U3ZXBnamoxZmJCbURKcVpTbnN5WWdQWU9BalNqQ09FYlZ0bVp2QnQwWUxkYVRPZVhyT0lEZFR1QkoKbjZLWUU0VVhQNmNpWUt0bjFYZkF5QnlYdzh1cWlYKzBWNk04Ym1sK2tWYWRLUE8xWWI1c25RUVRNbnREYlBNbQpaQmRZZDhjVFRjZHFIdWVQQmxSeXdqbXAvN2s4T1N3Si9ySHpjMkUrWktVNUdVT2F1TU5Mc0NjUDJhOWRsamZ0Cmdla1l6QjNyNXgzSDRzOCthOUViL1pSZjhnTHdpa0xzRTEwU1ZCN0wrbiszL3pDMTJtWWVkRHpCOGdPNTVsS3gKZnljT3JXbTYwd3ZIWjJYVkFGZkRaQmI0dkkxWlFXTTRSVHU3L053WlF3SURBUUFCb0FBd0RRWUpLb1pJaHZjTgpBUUVMQlFBRGdnRUJBQzROaGtTcWt0eElna2JuK2dRbmQ3ZjdpNUlPVnBjOGlSVlJrM1RkbmVuYWIra0EzTUVpCitzemlXOG56bHc0Y243RTZUZ2ZpMXJOVVRDOWxQMkkyTnlraFpad2VaQWlJME90N2FtMm83blhlSmwwRHdEVGwKV3laQXFBenBMNWFINjlmWW16amRxUHVGdHloaEd2akVVcDdWTldOTXZEbkpRUUNmdlZFdVhqMWVPeGVkeHVGLwpFR2dMS3dmemM5RFdoWGx3NDJNa1BGeldYbkRheW1zYVQ0QUd6VVhwWEgySGRhNG1qcUQ2ZTYxZ3ZQTjNSbmZMCnFlWFdrVTNTeFRoNk9od1N3QTR2a3g2TFV3VUhlNHBsbTRmcXhBay8zTHZ2WWNLOVhUWWxnY2hZY09SNUpRQkkKRXJUN3FkM2s4d29qclhnclJVT2RudDJXMmJvYS9xUCtIM2c9Ci0tLS0tRU5EIENFUlRJRklDQVRFIFJFUVVFU1QtLS0tLQo= 
+  signerName: example.com/serving
+  usages:
+  - digital signature
+  - key encipherment
+  - server auth
+
+thay key vào mục request
+# Check Certificate Signing Request
+controlplane ~ ✖ kubectl get csr
+NAME        AGE   SIGNERNAME                                    REQUESTOR                  REQUESTEDDURATION   CONDITION
+akshay      24s   example.com/serving                           kubernetes-admin           <none>              Pending
+csr-4jjgj   13m   kubernetes.io/kube-apiserver-client-kubelet   system:node:controlplane   <none>     Approve the CSR Request         Approved,Issued
+
+# Approve the CSR Request
+kubectl certificate approve akshay
+
+# Hmmm.. You are not aware of a request coming in. What groups is this CSR requesting access to?
+# Check the details about the request. Preferebly in YAML.
+kubectl get csr agent-smith -o yaml
+
+#  Reject that request
+kubectl certificate deny agent-smith
+
+## Bài tập kubeconfig
+Where is the default kubeconfig file located in the current environment?
+/root/.kube/config
+# How many clusters are defined in the default kubeconfig file?
+kubectl config view
+# I would like to use the dev-user to access test-cluster-1. Set the current context to the right one so I can do that. Once the right context is identified, use the kubectl config use-context command.
+kubectl config --kubeconfig=/root/my-kube-config use-context research
+# To know the current context, run the command:
+ kubectl config --kubeconfig=/root/my-kube-config current-context
+ # đường dẫn chứng chỉ
+  /etc/kubernetes/pki/users/
+
+####
+# API Group
+# Giả sử muôn kiểm tra phiên kube-master
+curl https://kube-master:6443/version
+# Để truy cập vào URI api pod
+curl https://kube-master:6443/api/v1/pods
+# API được nhóm vào nhiều nhóm api dựa trên mục đích của chúng như 
+healthy, metric,logs, version...
+
+# Những api chịu trách nhiệm về chức năng cụm
+/api và /apis
+# về API
+trong này sẽ chứa các namespace, pods, rc,event, endpoint, nodes,binding, PV, PVC, configmap, secret, services
+# về APIS
+sẽ tổ chức hơn, trong tương lai tât cả các tính năng mới hơn sẽ được cung cấp thông qua nhóm này 
+/extension, /networking.k8s.io, /storge.k8s.io ,/authentication.k8s.io
+
+# Để vào APIS
+curl http://localhost:6443/apis -k | grep "name"
+# tùy chọn khác thay thế là khởi động kubectl proxy 
+gõ "kubectl proxy" sẽ tự động curl http://localhost:8001 -k
+
+####
+# Authorization xác thực và ủy quyền 
+# có các cơ chế ủy quyền khác nhau trên kubernetes ví dụ 
+node, ABAC, RBAC, webhook
+#Trong Kubernetes, có một số hình thức ủy quyền (authorization) khác nhau được hỗ trợ để quản lý quyền truy cập và phân quyền cho người dùng và entites. Dưới đây là các dạng phổ biến của ủy quyền trong Kubernetes:
+
+Role-Based Access Control (RBAC): RBAC là một cơ chế quản lý quyền truy cập dựa trên vai trò (Role) trong Kubernetes. Với RBAC, bạn xác định các vai trò, quyền (permissions) và liên kết vai trò (role binding) cho người dùng hoặc entites. Vai trò quy định các quyền truy cập cho các tài nguyên cụ thể, ví dụ: đọc, tạo, cập nhật, xóa. Vai trò liên kết với người dùng hoặc entites để ủy quyền các quyền tương ứng.
+
+Attribute-Based Access Control (ABAC): ABAC là một hình thức ủy quyền dựa trên thuộc tính của người dùng, đối tượng và môi trường. Bằng cách sử dụng các tiêu chí thuộc tính, như nhãn (labels), namespace, địa chỉ IP và nhiều thuộc tính khác, ABAC quyết định quyền truy cập cho người dùng hoặc entites. Điều này cho phép quyền truy cập được kiểm soát một cách linh hoạt và chi tiết hơn so với RBAC.
+
+Node Authorization: Node Authorization quy định quyền truy cập cho các nút (nodes) trong Kubernetes cluster. Bằng cách sử dụng Node Authorization, bạn có thể kiểm soát quyền truy cập của các nút vào các tài nguyên và chức năng trong cluster. Ví dụ, bạn có thể xác định rằng một nút cụ thể chỉ được phép đọc dữ liệu từ một số tài nguyên nhất định.
+
+Webhook Authorization: Webhook Authorization cho phép gửi yêu cầu xác thực đến một webhook bên ngoài để quyết định quyền truy cập. Khi yêu cầu truy cập được gửi đến Kubernetes API server, nó sẽ chuyển tiếp yêu cầu tới webhook để kiểm tra và quyết định việc ủy quyền. Webhook Authorization cung cấp khả năng mở rộng và tùy chỉnh cao, cho phép tích hợp với các hệ thống xác thực và ủy quyền bên ngoài.
+
+Mỗi dạng ủy quyền có đặc điểm và cách sử dụng riêng, và tùy thuộc vào yêu cầu và môi trường cụ thể, bạn có thể sử dụng một hoặc nhiều dạng ủy quyền trong Kubernetes để đáp ứng các yêu cầu phân quyền và bảo mật.
+
+ngoài ra còn :
+Always Allow: Trong chế độ Always Allow, mọi yêu cầu truy cập đến các tài nguyên và chức năng trong Kubernetes đều được chấp nhận mặc dù không có quy tắc ủy quyền cụ thể. Điều này đồng nghĩa với việc không có kiểm tra quyền truy cập và tất cả các yêu cầu được chấp nhận một cách tự động.
+
+Always Deny: Trái ngược với Always Allow, chế độ Always Deny từ chối mọi yêu cầu truy cập mặc định và không cho phép bất kỳ hành động nào trên các tài nguyên và chức năng trong Kubernetes. Để cho phép quyền truy cập, bạn phải xác định các quy tắc ủy quyền cụ thể.
+
+###
+# Role base Access control
+RBAC trong Kubernetes (K8s) là mô hình quản lý quyền truy cập dựa trên vai trò (Role-Based Access Control). Nó được sử dụng để kiểm soát quyền truy cập của người dùng, ServiceAccount và nhóm người dùng vào các tài nguyên trong một cụm Kubernetes.
+
+RBAC trong K8s cho phép bạn xác định các vai trò (Roles) và gán chúng cho các tài nguyên như các đối tượng (objects) trong các namespace, ví dụ như Pods, Deployments, Services, ConfigMaps, và nhiều hơn nữa. Mỗi vai trò có thể được xác định với một tập hợp các quyền truy cập như tạo, đọc, cập nhật hoặc xóa tài nguyên.
+
+Để thực hiện RBAC trong Kubernetes, bạn cần định nghĩa các thành phần sau:
+
+Role: Định nghĩa các quyền truy cập cho các tài nguyên trong một namespace cụ thể.
+
+RoleBinding: Liên kết vai trò (Role) với người dùng hoặc ServiceAccount để cấp quyền truy cập tương ứng.
+
+ClusterRole: Tương tự như Role, nhưng áp dụng trên cấp cụm (cluster-wide) chứ không giới hạn trong một namespace.
+
+ClusterRoleBinding: Tương tự như RoleBinding, nhưng áp dụng trên cấp cụm (cluster-wide).
+
+Khi RBAC được cấu hình, Kubernetes sẽ kiểm tra các quyền truy cập của người dùng hoặc ServiceAccount dựa trên vai trò và liên kết vai trò. Điều này giúp đảm bảo rằng chỉ những người dùng hoặc ServiceAccount được phân quyền mới có thể thực hiện các hoạt động nhất định trên tài nguyên trong cụm Kubernetes, giới hạn rủi ro bảo mật và kiểm soát quyền truy cập.
+###
+Trong Kubernetes (K8s), RBAC cũng được sử dụng để quản lý quyền truy cập trong cụm Kubernetes. Dưới đây là một số câu lệnh liên quan đến RBAC trong Kubernetes:
+
+Tạo tài nguyên Role:
+
+css
+Copy code
+kubectl create role role_name --verb=verb --resource=resource
+Xem danh sách các Role có sẵn:
+
+arduino
+Copy code
+kubectl get roles
+Xem thông tin chi tiết về một Role cụ thể:
+
+sql
+Copy code
+kubectl describe role role_name
+Tạo tài nguyên RoleBinding để gán Role cho một ServiceAccount hoặc một người dùng cụ thể:
+
+css
+Copy code
+kubectl create rolebinding rolebinding_name --role=role_name --user=user_name --namespace=namespace_name
+Xem danh sách các RoleBinding:
+
+arduino
+Copy code
+kubectl get rolebindings
+Xem thông tin chi tiết về một RoleBinding cụ thể:
+
+sql
+Copy code
+kubectl describe rolebinding rolebinding_name
+Tạo tài nguyên ClusterRole:
+
+css
+Copy code
+kubectl create clusterrole cluster_role_name --verb=verb --resource=resource
+Xem danh sách các ClusterRole có sẵn:
+
+arduino
+Copy code
+kubectl get clusterroles
+Tạo tài nguyên ClusterRoleBinding để gán ClusterRole cho một ServiceAccount hoặc một người dùng cụ thể:
+
+css
+Copy code
+kubectl create clusterrolebinding cluster_role_binding_name --clusterrole=cluster_role_name --user=user_name
+Xem danh sách các ClusterRoleBinding:
+
+arduino
+Copy code
+kubectl get clusterrolebindings
+Kiểm tra quyền truy cập của một người dùng hoặc ServiceAccount đến một tài nguyên cụ thể:
+
+csharp
+Copy code
+kubectl auth can-i verb resource --as=system:serviceaccount:namespace:serviceaccount_name
+Lưu ý rằng RBAC trong Kubernetes có thể được cấu hình phức tạp và liên quan đến nhiều tài nguyên khác nhau như Roles, RoleBindings, ClusterRoles, và ClusterRoleBindings. Các câu lệnh trên chỉ cung cấp một số ví dụ cơ bản, và cú pháp cụ thể có thể khác nhau tùy thuộc vào phiên bản Kubernetes và cấu hình RBAC của bạn.
+
+## cho ví dụ cụ thể về role, rolebinding, clusterRole, clusterrolebinding
+
+Dưới đây là một ví dụ cụ thể về Role, RoleBinding, ClusterRole và ClusterRoleBinding trong Kubernetes:
+
+Role (vai trò):
+Ví dụ, ta có một vai trò (Role) có tên là "pod-reader" trong namespace "example-namespace" cho phép đọc (get, list, watch) tất cả các Pods trong namespace đó:
+
+yaml
+Copy code
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: example-namespace
+  name: pod-reader
+rules:
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "list", "watch"]
+RoleBinding (liên kết vai trò):
+Ví dụ, ta có một RoleBinding (liên kết vai trò) có tên là "pod-reader-binding" trong namespace "example-namespace" liên kết vai trò "pod-reader" với người dùng "user1":
+
+yaml
+Copy code
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  namespace: example-namespace
+  name: pod-reader-binding
+subjects:
+- kind: User
+  name: user1
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: pod-reader
+  apiGroup: rbac.authorization.k8s.io
+ClusterRole (vai trò cụm):
+Ví dụ, ta có một ClusterRole (vai trò cụm) có tên là "node-viewer" cho phép đọc (get, list, watch) tất cả các Node trong cụm:
+
+yaml
+Copy code
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: node-viewer
+rules:
+- apiGroups: [""]
+  resources: ["nodes"]
+  verbs: ["get", "list", "watch"]
+ClusterRoleBinding (liên kết vai trò cụm):
+Ví dụ, ta có một ClusterRoleBinding (liên kết vai trò cụm) có tên là "node-viewer-binding" liên kết vai trò "node-viewer" với ServiceAccount "my-serviceaccount" trong namespace "example-namespace":
+
+yaml
+Copy code
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: node-viewer-binding
+subjects:
+- kind: ServiceAccount
+  name: my-serviceaccount
+  namespace: example-namespace
+roleRef:
+  kind: ClusterRole
+  name: node-viewer
+  apiGroup: rbac.authorization.k8s.io
+Trong các ví dụ trên, chúng ta đã định nghĩa các vai trò (Role và ClusterRole) để quy định quyền truy cập đến các tài nguyên (Pods và Nodes) và sử dụng RoleBinding và ClusterRoleBinding để liên kết các vai trò đó với người dùng (User) hoặc ServiceAccount.
+
+## bài tập:
+# How many roles exist in all namespaces together?
+kubectl get role
+# What are the resources the kube-proxy role in the kube-system namespace is given access to?
+controlplane ~ ➜  kubectl get role -n kube-system 
+NAME                                             CREATED AT
+extension-apiserver-authentication-reader        2023-06-08T20:33:49Z
+kube-proxy                                       2023-06-08T20:33:52Z
+kubeadm:kubelet-config                           2023-06-08T20:33:49Z
+kubeadm:nodes-kubeadm-config                     2023-06-08T20:33:49Z
+system::leader-locking-kube-controller-manager   2023-06-08T20:33:49Z
+system::leader-locking-kube-scheduler            2023-06-08T20:33:49Z
+system:controller:bootstrap-signer               2023-06-08T20:33:49Z
+system:controller:cloud-provider                 2023-06-08T20:33:
+# next describle resource in namespace kube-system
+controlplane ~ ➜  kubectl describe role kube-proxy -n kube-system
+Name:         kube-proxy
+Labels:       <none>
+Annotations:  <none>
+PolicyRule:
+  Resources   Non-Resource URLs  Resource Names  Verbs
+  ---------   -----------------  --------------  -----
+  configmaps  []                 [kube-proxy]    [get]
+# edit role 
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  creationTimestamp: "2023-06-08T20:33:52Z"
+  name: kube-proxy
+  namespace: kube-system
+  resourceVersion: "291"
+  uid: 7db1e5da-abd4-47e6-8069-4f136ab39869
+rules:
+- apiGroups:
+  - ""
+  resourceNames:
+  - kube-proxy
+  resources:
+  - configmaps
+  verbs:
+  - get
+# Giải nghĩa cấu hình
+Trong đoạn mã bạn đưa ra, Role có các quyền truy cập và phân quyền như sau:
+
+apiGroups: [""]: Đây chỉ định các nhóm API mà Role có quyền truy cập. Trong trường hợp này, "" đại diện cho nhóm API mặc định.
+
+resourceNames: ["kube-proxy"]: Đây là danh sách các tên tài nguyên cụ thể mà Role có quyền truy cập. Trong trường hợp này, chỉ có tài nguyên có tên là "kube-proxy" mới được phép truy cập.
+
+resources: ["configmaps"]: Đây là danh sách các loại tài nguyên mà Role có quyền truy cập. Trong trường hợp này, chỉ có tài nguyên ConfigMap mới được phép truy cập.
+
+verbs: ["get"]: Đây là danh sách các hành động mà Role có quyền thực hiện trên tài nguyên được chỉ định. Trong trường hợp này, Role chỉ có quyền thực hiện hành động "get" trên tài nguyên ConfigMap có tên là "kube-proxy".
+
+Với các quyền truy cập và phân quyền này, Role sẽ có khả năng truy cập và lấy thông tin từ ConfigMap có tên "kube-proxy". Tuy nhiên, nó không có quyền thực hiện các hành động khác như tạo, cập nhật hoặc xóa ConfigMap, chỉ có quyền thực hiện hành động "get" trên tài nguyên này.
+# Which account is the kube-proxy role assigned to?
+kubectl describe rolebinding kube-proxy -n kube-system
+# anser: Group  system:bootstrappers:kubeadm:default-node-token
+controlplane ~ ➜  kubectl describe rolebinding kube-proxy -n kube-system
+Name:         kube-proxy
+Labels:       <none>
+Annotations:  <none>
+Role:
+  Kind:  Role
+  Name:  kube-proxy
+Subjects:
+  Kind   Name                                             Namespace
+  ----   ----                                             ---------
+  Group  system:bootstrappers:kubeadm:default-node-token  
+
+# A user dev-user is created. User's details have been added to the kubeconfig file. Inspect the permissions granted to the user. Check if the user can list pods in the default namespace.Use the --as dev-user option with kubectl to run commands as the dev-user.
+
+# check kubeconfig
+controlplane ~ ➜  kubectl config view 
+apiVersion: v1
+clusters:
+- cluster:
+    certificate-authority-data: DATA+OMITTED
+    server: https://controlplane:6443
+  name: kubernetes
+contexts:
+- context:
+    cluster: kubernetes
+    user: kubernetes-admin
+  name: kubernetes-admin@kubernetes
+current-context: kubernetes-admin@kubernetes
+kind: Config
+preferences: {}
+users:
+- name: dev-user
+  user:
+    client-certificate-data: DATA+OMITTED
+    client-key-data: DATA+OMITTED
+- name: kubernetes-admin
+  user:
+    client-certificate-data: DATA+OMITTED
+    client-key-data: DATA+OMITTED
+# check pod as dev-user
+controlplane ~ ➜  kubectl get pod --as dev-user 
+Error from server (Forbidden): pods is forbidden: User "dev-user" cannot list resource "pods" in API group "" in the namespace "default"
+
+# Create the necessary roles and role bindings required for the dev-user to create, list and delete pods in the default namespace.
+Role: developer
+
+Role Resources: pods
+
+Role Actions: list
+
+Role Actions: create
+
+Role Actions: delete
+
+RoleBinding: dev-user-binding
+
+RoleBinding: Bound to dev-user
+###
+controlplane ~ ➜  kubectl create role developer --verb=list --verb=create --verb=delete --resource=pods
+role.rbac.authorization.k8s.io/developer created
+
+controlplane ~ ➜  kubectl create rolebinding dev-user-binding --role=developer --user=dev-user
+rolebinding.rbac.authorization.k8s.io/dev-user-binding created
+
+# Add a new rule in the existing role developer to grant the dev-user permissions to create deployments in the blue namespace.Remember to add api group "apps".
+
+rules:
+- apiGroups:
+  - ""
+  resourceNames:
+  - dark-blue-app
+  resources:
+  - pods
+  verbs:
+  - get
+  - watch
+  - create
+  - delete
+- apiGroups:
+  - "apis"
+  resources:
+  - deployments
+  verbs:
+  - get
+  - watch
+  - create
+  - delete
+  
+
+
+
+
+
