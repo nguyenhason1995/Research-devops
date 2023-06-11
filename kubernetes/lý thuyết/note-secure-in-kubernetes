@@ -520,9 +520,216 @@ clusterrole.rbac.authorization.k8s.io/storage-admin created
 controlplane ~ ➜  kubectl create clusterrolebinding storage-admin --user=michelle --clusterrole storage-admin
 clusterrolebinding.rbac.authorization.k8s.io/storage-admin created
 
+######
+# Service account
+## Tạo service account
+kubectl create serviceaccount dashboard-sa
+## khi tạo ra serviceaccount thì kubernetes sẽ tạo đồng thời secret dashboard
+kubectl describe secret dashboard-sa-token-2dqw9 #(dashboard-sa-token-2dqw9 ở trong serviceaccount)
+## Run token để application connect tới api-server
+kubectl create token dashboard-sa
+# lệnh này sẽ có kết quả tương tự như cách ở trên
+## You shouldn't have to copy and paste the token each time. The Dashboard application is programmed to read token from the secret mount location. However currently, the default service account is mounted. Update the deployment to use the newly created ServiceAccount.Edit the deployment to change ServiceAccount from default to dashboard-sa.
+
+# Deployment name: web-dashboard
+Service Account: dashboard-sa
+Deployment Ready
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-dashboard
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: web-dashboard
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        name: web-dashboard
+    spec:
+      serviceAccountName: dashboard-sa
+      containers:
+      - image: gcr.io/kodekloud/customimage/my-kubernetes-dashboard
+        imagePullPolicy: Always
+        name: web-dashboard
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+# chú ý thêm dòng service account trong spec của pod
+####
+# image security
+
+# Để cấu hình trỏ đến một registry hình ảnh container trong Kubernetes bằng câu lệnh thay vì sử dụng file YAML, bạn có thể sử dụng các lệnh kubectl để tạo Secret và cấu hình Pod.
+# Tạo một Secret:
+kubectl create secret docker-registry dockerhub-credentials \
+    --docker-server=https://hub.docker.com/ \
+    --docker-username=<your-username> \
+    --docker-password=<your-password> \
+    --docker-email=<your-email>
+
+Trong đó:
+
+<secret-name>: Tên của Secret.
+<registry-url>: URL của registry hình ảnh container.
+<username>: Tên đăng nhập vào registry.
+<password>: Mật khẩu để truy cập vào registry.
+<email>: Địa chỉ email liên kết với tài khoản đăng nhập.
+Ví dụ, để tạo một Secret có tên "dockerhub-credentials" để truy cập Docker Hub, bạn có thể sử dụng lệnh sau:
+
+# Cấu hình Pod:
+kubectl run <pod-name> --image=<image-name> --image-pull-secret=<secret-name>
+
+Trong đó:
+
+<pod-name>: Tên của Pod.
+<image-name>: Tên hình ảnh container.
+<secret-name>: Tên của Secret đã tạo.
+Ví dụ, để tạo một Pod có tên "my-pod" sử dụng hình ảnh "my-image" và sử dụng Secret "dockerhub-credentials", bạn có thể sử dụng lệnh sau:
+
+kubectl run my-pod --image=my-image --image-pull-secret=dockerhub-credentials
+
+##
+# cấu trúc của image được lấy từ registry 
+Cấu trúc của một image được lấy từ một registry thông thường là:
+
+<registry>/<namespace>/<repository>:<tag>
+
+Trong đó:
+
+<registry>: Địa chỉ hoặc tên miền của registry, ví dụ: docker.io, quay.io, myprivateregistry.com, vv.
+<namespace>: Tùy chọn, namespace hoặc tên tổ chức trong registry.
+<repository>: Tên của repository chứa image.
+<tag>: Tùy chọn, phiên bản hoặc tag của image.
+Ví dụ:
+
+docker.io/library/nginx:latest
+quay.io/myorg/myapp:1.0
+myprivateregistry.com/myproject/myimage:dev
+Đây là cấu trúc chung, tuy nhiên, mỗi registry có thể có các quy ước đặc thù riêng, vì vậy bạn cần xem tài liệu của registry cụ thể để biết chi tiết hơn về cấu trúc của nó.
+
+
+## bài tập
+# We decided to use a modified version of the application from an internal private registry. Update the image of the deployment to use a new image from myprivateregistry.com:5000 The registry is located at myprivateregistry.com:5000. Don't worry about the credentials for now. We will configure them in the upcoming steps.
+
+image:myprivateregistry.com:5000/nginx:alpine
+ # Configure the deployment to use credentials from the new secret to pull images from the private registry
+ thêm vào spec trong pod
+ imagePullSecrets:
+  - name: regcred
+####
+# Security in docker
+# là không sử dụng user root
+# Security context
+Security Context (bối cảnh bảo mật) trong Kubernetes là một cơ chế để cung cấp và quản lý các thiết lập bảo mật cho các container trong một pod. Nó cho phép bạn định cấu hình các thuộc tính bảo mật như người dùng, nhóm người dùng, giới hạn tài nguyên, chế độ bảo mật, và các chính sách khác liên quan đến container.
+
+Các thuộc tính bảo mật được định nghĩa trong Security Context có thể áp dụng cho cả pod và các container bên trong pod. Một số thuộc tính quan trọng trong Security Context bao gồm:
+
+Run As User và Run As Group: Xác định người dùng và nhóm người dùng mà container sẽ chạy với đặc quyền của. Điều này giúp hạn chế quyền truy cập và giảm nguy cơ từ các container độc hại hoặc xâm nhập vào hệ thống.
+
+Privileged: Cho phép container chạy với quyền đặc quyền (root) trên node. Việc sử dụng quyền đặc quyền có thể tạo ra một môi trường không an toàn và nên được hạn chế.
+
+Seccomp và AppArmor: Cho phép bạn áp dụng các chế độ bảo mật như Seccomp hoặc AppArmor để hạn chế quyền truy cập của container đến các hệ thống nhạy cảm hoặc các hành động nguy hiểm.
+
+Giới hạn tài nguyên (Resource Limits): Cho phép bạn định cấu hình giới hạn tài nguyên về CPU, bộ nhớ và lưu trữ cho container. Điều này giúp đảm bảo rằng container không chiếm quá nhiều tài nguyên và ảnh hưởng đến hiệu suất của hệ thống.
+
+Security Context Constraints (SCC): Là một cơ chế mở rộng trong OpenShift, cho phép quản trị viên định nghĩa các ràng buộc bảo mật để giới hạn các đặc quyền và hành vi của các container trong cụm Kubernetes.
+
+Sử dụng Security Context, bạn có thể tăng cường bảo mật của các container trong Kubernetes và áp dụng các chính sách bảo mật phù hợp với yêu cầu của ứng dụng và môi trường triển khai. Điều này đóng vai trò quan trọng trong việc đảm bảo tính toàn vẹn, an ninh và cách ly giữa các container trong một môi trường Kubernetes.
+## cấu hình
+Để cấu hình Security Context trong Kubernetes, bạn có thể sử dụng các thuộc tính sau đây trong tệp cấu hình của pod hoặc container:
+
+Cấu hình Security Context cho Pod:
+
+securityContext: Đặt các thuộc tính bảo mật cho toàn bộ pod.
+spec.containers[*].securityContext: Đặt các thuộc tính bảo mật cho tất cả các container trong pod.
+Cấu hình Security Context cho Container:
+
+securityContext: Đặt các thuộc tính bảo mật cho container cụ thể.
+securityContext.runAsUser và securityContext.runAsGroup: Xác định người dùng và nhóm người dùng mà container sẽ chạy với đặc quyền của.
+securityContext.privileged: Đặt giá trị true để cho phép container chạy với quyền đặc quyền (root).
+securityContext.capabilities: Định cấu hình các quyền đặc quyền (capabilities) cho container.
+securityContext.seccompProfile và securityContext.appArmorProfile: Xác định cấu hình Seccomp và AppArmor cho container.
+resources.limits và resources.requests: Định cấu hình giới hạn và yêu cầu tài nguyên (CPU, bộ nhớ, lưu trữ) cho container.
+Dưới đây là một ví dụ về cấu hình Security Context trong một tệp cấu hình YAML của một pod:
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-pod
+spec:
+  containers:
+    - name: my-container
+      image: nginx
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 3000
+        capabilities:
+          add: ["NET_ADMIN"]
+        resources:
+          limits:
+            cpu: "1"
+            memory: "512Mi"
+          requests:
+            cpu: "0.5"
+            memory: "256Mi"
+
+Trong ví dụ trên, container được đặt để chạy với người dùng có ID 1000, nhóm người dùng có ID 3000, được cấp quyền NET_ADMIN, và có giới hạn tài nguyên CPU là 1 core và bộ nhớ là 512MB.
+
+Lưu ý rằng để sử dụng một số thuộc tính bảo mật như Seccomp và AppArmor, bạn cần cấu hình và kích hoạt chúng trên các node Kubernetes của bạn.
 
 
 
+## bàu tập
+# Edit the pod ubuntu-sleeper to run the sleep process with user ID 1010. Note: Only make the necessary changes. Do not modify the name or image of the pod.
+CheckCompleteIncomplete
+Pod Name: ubuntu-sleeper
+Image Name: ubuntu
+SecurityContext: User 1010
+# Cách 1:
+kubectl delete po ubuntu-sleeper 
 
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: ubuntu-sleeper
+  namespace: default
+spec:
+  securityContext:
+    runAsUser: 1010
+  containers:
+  - command:
+    - sleep
+    - "4800"
+    image: ubuntu
+    name: ubuntu-sleeper
 
+## dạng lồng
+apiVersion: v1
+kind: Pod
+metadata:
+  name: multi-pod
+spec:
+  securityContext:
+    runAsUser: 1001
+  containers:
+  -  image: ubuntu
+     name: web
+     command: ["sleep", "5000"]
+     securityContext:
+      runAsUser: 1002
 
+  -  image: ubuntu
+     name: sidecar
+     command: ["sleep", "5000"]
+
+## network policy
