@@ -733,3 +733,83 @@ spec:
      command: ["sleep", "5000"]
 
 ## network policy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: test-network-policy
+  namespace: default
+spec:
+  podSelector:
+    matchLabels:
+      role: db
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - ipBlock:
+            cidr: 172.17.0.0/16
+            except:
+              - 172.17.1.0/24
+        - namespaceSelector:
+            matchLabels:
+              project: myproject
+        - podSelector:
+            matchLabels:
+              role: frontend
+      ports:
+        - protocol: TCP
+          port: 6379
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 10.0.0.0/24
+      ports:
+        - protocol: TCP
+          port: 5978
+
+# giải thích :
+Trên đây là một ví dụ về một Network Policy trong Kubernetes để điều chỉnh luồng mạng cho các Pod trong một namespace cụ thể. Network Policy được sử dụng để kiểm soát traffic mạng giữa các Pod trong cluster Kubernetes.
+
+Ở ví dụ trên, Network Policy có tên là "test-network-policy" và thuộc namespace "default". Các điểm quan trọng trong Network Policy này bao gồm:
+
+- `podSelector`: Xác định các Pod mà Network Policy áp dụng. Trong ví dụ này, nó áp dụng cho các Pod có nhãn "role: db".
+- `policyTypes`: Liệt kê các loại chính sách được áp dụng cho Network Policy này. Trong ví dụ này, nó bao gồm cả chính sách "Ingress" (luồng vào) và "Egress" (luồng ra).
+- `ingress`: Xác định các quy tắc cho traffic mạng đi vào Pod. Trong ví dụ này, có ba quy tắc ingress:
+  - Từ địa chỉ CIDR 172.17.0.0/16, trừ CIDR 172.17.1.0/24.
+  - Từ các Pod thuộc namespace có nhãn "project: myproject".
+  - Từ các Pod có nhãn "role: frontend".
+  - Traffic này chỉ được phép đi qua cổng TCP 6379.
+- `egress`: Xác định các quy tắc cho traffic mạng đi ra khỏi Pod. Trong ví dụ này, chỉ có một quy tắc egress:
+  - Đến địa chỉ CIDR 10.0.0.0/24.
+  - Traffic này chỉ được phép đi qua cổng TCP 5978.
+
+Các quy tắc ingress và egress trong Network Policy này giúp kiểm soát luồng traffic mạng đến và đi từ các Pod có nhãn "role: db" trong namespace "default".
+## bài tập
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: internal-policy
+  namespace: default
+spec:
+  podSelector:
+    matchLabels:
+      name: internal
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - podSelector:
+             matchLabels:
+              name: payroll
+      ports:
+        - protocol: TCP
+          port: 8080
+
+    - to:
+        - podSelector:
+             matchLabels:
+              name: mysql
+      ports:
+        - protocol: TCP
+          port: 3306
