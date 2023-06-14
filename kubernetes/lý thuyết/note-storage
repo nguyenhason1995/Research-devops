@@ -1,0 +1,45 @@
+# PV, PVC
+Using PVCs in Pods
+Once you create a PVC use it in a POD definition file by specifying the PVC Claim name under
+persistentVolumeClaim section in the volumes section like this:
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mypod
+spec:
+  containers:
+    - name: myfrontend
+      image: nginx
+      volumeMounts:
+      - mountPath: "/var/www/html"
+        name: mypd
+  volumes:
+    - name: mypd
+      persistentVolumeClaim:
+        claimName: myclaim
+
+
+The same is true for ReplicaSets or Deployments. Add this to the pod template section of a Deployment on ReplicaSet.
+
+
+
+Reference URL: https://kubernetes.io/docs/concepts/storage/persistent-volumes/#claims-as-volumes
+## Tài liệu về volume khá đầu đủ: 
+https://viblo.asia/p/kubernetes-series-bai-6-volume-gan-disk-storage-vao-container-OeVKB6rrKkW
+
+###
+# Storage class
+
+StorageClass trong Kubernetes được sử dụng khi bạn cần định cấu hình và quản lý lớp lưu trữ động cho các ứng dụng chạy trên Kubernetes cluster. Dưới đây là một số tình huống thường gặp khi bạn nên sử dụng StorageClass:
+
+Đa dạng hóa lựa chọn lưu trữ: StorageClass cho phép bạn định nghĩa nhiều lớp lưu trữ với các thuộc tính và tùy chọn khác nhau. Bạn có thể sử dụng StorageClass để đa dạng hóa các lựa chọn lưu trữ dựa trên yêu cầu và hạn chế của ứng dụng, chẳng hạn như loại ổ đĩa, loại dịch vụ lưu trữ, hiệu suất, độ phân tán dữ liệu và tính năng bảo mật.
+
+Tự động hóa cấu hình lưu trữ: Khi sử dụng StorageClass, bạn có thể tự động hóa quy trình tạo và cấu hình PersistentVolume. Thay vì phải tạo và quản lý từng PersistentVolume một cách thủ công, bạn chỉ cần tạo PersistentVolumeClaim (PVC) và liên kết nó với một StorageClass. Kubernetes sẽ tự động cấu hình và cung cấp một PersistentVolume phù hợp cho PVC.
+
+Tự động mở rộng và linh hoạt: StorageClass cho phép bạn tự động mở rộng và linh hoạt trong việc cung cấp lưu trữ cho các ứng dụng. Bạn có thể thiết lập quy tắc và hệ thống tự động cho phép Kubernetes tạo và phá hủy PersistentVolume dựa trên nhu cầu lưu trữ thay đổi của các ứng dụng.
+
+Quản lý tài nguyên lưu trữ: StorageClass cung cấp một cách thuận tiện để quản lý tài nguyên lưu trữ trong Kubernetes. Bạn có thể kiểm soát và giới hạn số lượng PersistentVolume được tạo từ mỗi StorageClass, giúp bạn quản lý tài nguyên và đảm bảo việc sử dụng tài nguyên hiệu quả.
+
+Tóm lại, khi bạn muốn tạo và quản lý lớp lưu trữ động cho các ứng dụng chạy trên Kubernetes, bạn nên sử dụng StorageClass để định cấu hình và cung cấp khối lưu trữ phù hợp dựa trên yêu cầu và hạn chế của ứng dụng
+
