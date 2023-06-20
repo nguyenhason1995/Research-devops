@@ -43,3 +43,7 @@ Quản lý tài nguyên lưu trữ: StorageClass cung cấp một cách thuận 
 
 Tóm lại, khi bạn muốn tạo và quản lý lớp lưu trữ động cho các ứng dụng chạy trên Kubernetes, bạn nên sử dụng StorageClass để định cấu hình và cung cấp khối lưu trữ phù hợp dựa trên yêu cầu và hạn chế của ứng dụng
 
+###
+# note:
+
+Lớp lưu trữ gọi là local-storage sử dụng VolumeBindingMode được thiết lập thành WaitForFirstConsumer. Điều này sẽ trì hoãn quá trình kết nối và cung cấp PersistentVolume cho đến khi một Pod sử dụng PersistentVolumeClaim được tạo ra.
