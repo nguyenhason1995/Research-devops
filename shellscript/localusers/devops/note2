@@ -1,0 +1,3 @@
+
+sed -i 's/"secretIdentity".*n",/"secretIdentity": "ABC",/g' test.json
+# thay the cac ky tu n tren muc ...

@@ -1,0 +1,10 @@
+sed -i '0,/39/s//49/g' test.json > new_test.json
+
+# sua so 39 dau tien trong file a.json
+
+# de search crontab su dung trong crontab guru
+
+# De thay the mot ky tu trong ca van ban
+# "." moi ky tu "*" ca van ban
+sed -i 's/name: M.*/name: replace/g' a.json
+
