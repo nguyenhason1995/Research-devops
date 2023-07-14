@@ -1,9 +1,13 @@
 # làm việc với cmd:
 
 `dir` list các thư mục bên trong
+
 `cd` để vào bên trong thư mục
+
 `cls` để xóa screen
+
 `mkdir` tạo file
+
 # install git:
 - download git:
 [git](https://git-scm.com/download/win)
