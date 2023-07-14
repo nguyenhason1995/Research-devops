@@ -1,0 +1,37 @@
+## Để làm việc trên 1 namespace
+kubectl config set-context --current --namespace=alpha
+## check controlplane service
+service kube-apiserver status
+service kube-controller-manager status
+# check log 
+kubectl logs kube-apiserver-master -n kube-system
+
+# ngoài ra còn lệnh này để check 
+sudo journalctl -u kube-apiserver
+# Note lại khi worker node bị lỗi
+# check trạng thái của node 
+kubectl describle node worker-1
+
+Nếu status false thì node đang lỗi 
+Nếu status là unknown thì có khả năng bị mất node
+# các lệnh check trạng thái, tình trạng của node
+- top
+- df -h
+# check kubelet status
+systemctl kubelet status
+
+Sudo journalctl -u kubelet
+để dảm bảo chứng chỉ kubelet đã hết hạn chưa và thuộc chứng chỉ phù hợp nào 
+# kiểm tra node cũng cần vào tận trong worker node để kiểm tra kubelet
+vì kubelet gia tiếp với master node
+# thứ tự các bước kiểm tra worker node
+1. xem log phía controlplane 
+kubectl describle node node01
+# nếu chưa phát hiện gì thêm thì vào bên trong worker node để xem kubelet đã start chưa
+systemctl status kubelet
+# nếu chưa start thì hãy start lên
+###### chú ý:
+lệnh kubeclt logs không dùng để tra log vs node, nó chỉ sử dụng khi tra node thôi
+## thư mục chứa file cấu hình từ controlplane đến kubelet ở /etc/kubernetes/kubelet.conf
+## Thư mục cấu hình kubelet
+thư mục /var/lib/kubelet/config.yaml trên một node Kubernetes chứa các tệp cấu hình và dữ liệu liên quan đến kubelet - một trong các thành phần chính trong hệ thống Kubernetes.
