@@ -9,8 +9,7 @@
 [git](https://git-scm.com/download/win)
 # Một số các bước cài đặt cần chú ý:
 ![1](https://github.com/nguyenhason1995/research-devops/blob/main/git/image/Screenshot_1.png) 
-Bước tiếp theo:
 ![2](https://github.com/nguyenhason1995/research-devops/blob/main/git/image/Screenshot_2.png) 
-Bước tiếp theo:
 ![](https://github.com/nguyenhason1995/research-devops/blob/main/git/image/Screenshot_3.png) 
-Còn lại tiếp tục next đến hết.
+
+- Còn lại tiếp tục next đến hết.
