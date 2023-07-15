@@ -41,9 +41,16 @@
 - file .git là file ẩn để quản lý phiên bản của file (versioning) bên trong git repository
 
 # Tạo private repository:
+- Đầu tiên tạo private repo trên trang chủ của github
 
 ![4](https://github.com/nguyenhason1995/research-devops/blob/main/git/image/Screenshot_4.png) 
 
 ![5](https://github.com/nguyenhason1995/research-devops/blob/main/git/image/Screenshot_5.png) 
 
 ![6](https://github.com/nguyenhason1995/research-devops/blob/main/git/image/Screenshot_6.png) 
+
+- Muốn clone vào máy local thì phải có token, gõ token trước xong @ hậu tố còn lại :
+
+```php
+git clone https://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@github.com/tuhocdevops/my-private-repo.git
+```
