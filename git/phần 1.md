@@ -119,6 +119,71 @@ chưa ghi đè lên file của bạn.
 
 local
 
+# Tìm hiểu về branch
+
+Branches trong git là một tham chiếu đén một trạng thái nhất định của dự án bao gồm commit, tệp tin, thư mục. Mỗi branch có thể tồn tại song 
+
+song và độc lập với các brand khác, cho phép các thành viên trong nhóm làm việc đồng thời trên các tính năng, sửa lỗi của dự án mà không gây
+
+xung đột. Các lợi ích của branch:
+
+- Phân tách công việc: Có thể tạo các branch riêng biệt để phát triển các tính năng, sửa lỗi hoặc các phiên bản mới của dự án mà không làm ảnh 
+
+hưởng tới brand chính (thường là master hoặc main)
+
+- Đảm báo tính ổn đinh: Có thể kiểm tra và thử nghiệm các tính năng mới hoặc các sửa lỗi trong một branch riêng biệt trước khi hợp nhất vào 
+
+branch chính.
+
+- Quản lý các phiên bản: Có thể tạo ra các branch để đại diện cho các phiên bản phát hành hoặc các phiên bản ổn định của dự án, giúp dễ dàng 
+
+theo dõi và quản lý các phiên bản 
+
+Các lệnh cơ bản : 
+
+- git branch: Liệt kê các nhánh hiện có trong dự án.
+
+- git branch <branch-name>: Tạo một nhánh mới với tên được chỉ định.
+
+- git checkout <branch-name>: Chuyển đổi sang một nhánh khác.
+
+- git merge <branch-name>: Hợp nhất các thay đổi từ một nhánh khác vào nhánh hiện tại.
+
+- git branch -d <branch-name>: Xóa một nhánh đã hoàn thành.
+
+# HEAD: 
+
+HEAD là một con trỏ đặc biệt trong Git, được sử dụng để chỉ vị trí hiện tại của bạn trong repository. HEAD thường trỏ đến commit cuối cùng trên 
+
+branch đó. HEAD trong nhanh đại diện cho commit hiện tại mà ta đang làm việc.
+
+**Cách sử dụng**
+
+- Xem thông tin về HEAD: Bạn có thể sử dụng lệnh git log --oneline -n 1 HEAD để xem thông tin về commit cuối cùng mà HEAD đang trỏ đến trên nhánh hiện tại.
+
+- Chuyển đổi HEAD giữa các commit: Bằng cách sử dụng lệnh git checkout <commit-hash> hoặc git checkout <branch-name>, bạn có thể di chuyển HEAD đến commit hoặc nhánh mong muốn. Điều này cho phép bạn chuyển đổi giữa các commit khác nhau trong lịch sử của nhánh hoặc giữa các nhánh khác nhau.
+
+- Di chuyển HEAD sang commit trước đó: Sử dụng lệnh git checkout HEAD~1 để di chuyển HEAD đến commit trước đó trong lịch sử của nhánh hiện tại. Điều này có thể hữu ích khi bạn muốn quay lại commit trước đó để kiểm tra hoặc thực hiện các thay đổi khác.
+
+- Tạo nhánh mới từ HEAD: Bạn có thể tạo một nhánh mới từ HEAD bằng cách sử dụng lệnh git branch <new-branch-name> HEAD. Nhánh mới này sẽ được tạo từ commit hiện tại mà HEAD đang trỏ đến.
+
+# Rename Branch:
+
+- git switch branch_to_rename
+
+- git branch -m <new-name>
+
+# Delete Branch:
+
+- git branch -d <branch_to-delete-name>
+
+Nếu chắc chắn sẽ xóa branch này thì dùng -D
+
+- git branch -D <branch_to-delete-name>
+
+
+
+
 
 
 
