@@ -258,7 +258,39 @@ Khôi phục các tệp hoặc thư mục từ các phiên bản trước đó: 
 
 Lưu ý rằng các phiên bản Git mới đã bổ sung các hành động khác và khuyến nghị sử dụng git switch và git restore thay thế cho một số tình huống nhất định, nhưng git checkout vẫn là một trong những lệnh quan trọng và được sử dụng rộng rãi trong các phiên bản trước đó.
 
+**Ví dụ**
+
+![23](https://github.com/nguyenhason1995/research-devops/blob/main/git/image/Screenshot_23.png)
+
+git log:
+
+![24](https://github.com/nguyenhason1995/research-devops/blob/main/git/image/Screenshot_24.png)
+
+git log --oneline
+
+![25](https://github.com/nguyenhason1995/research-devops/blob/main/git/image/Screenshot_25.png)
+
+![26](https://github.com/nguyenhason1995/research-devops/blob/main/git/image/Screenshot_26.png)
+
+## git restore
+
+![28](https://github.com/nguyenhason1995/research-devops/blob/main/git/image/Screenshot_28.png)
+
+viết lên file:
+
+![29](https://github.com/nguyenhason1995/research-devops/blob/main/git/image/Screenshot_29.png)
+
+![30](https://github.com/nguyenhason1995/research-devops/blob/main/git/image/Screenshot_30.png)
 
 
+**Sử dụng Head source**
+
+![31](https://github.com/nguyenhason1995/research-devops/blob/main/git/image/Screenshot_31.png)
+
+![32](https://github.com/nguyenhason1995/research-devops/blob/main/git/image/Screenshot_32.png)
+
+## git reset
+
+Git reset cho phép 
 
 
