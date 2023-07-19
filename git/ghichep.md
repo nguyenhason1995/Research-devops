@@ -243,6 +243,22 @@ nhau giữa các version. Nó giúp show ra điểm khác biệt giữa các ver
 
 ![22](https://github.com/nguyenhason1995/research-devops/blob/main/git/image/Screenshot_22.png) 
 
+# Undoing changes (hoàn tác các thay đổi)
+
+**Git checkout, git detached**
+rong Git, lệnh git checkout được sử dụng để thực hiện các hành động sau:
+
+Chuyển đổi giữa các nhánh: Khi bạn muốn chuyển từ một nhánh sang nhánh khác, bạn có thể sử dụng git checkout <tên-nhánh>. Ví dụ: git checkout feature-branch.
+
+Tạo và chuyển đổi nhánh mới: Nếu bạn muốn tạo một nhánh mới và chuyển đến nhánh đó ngay lập tức, bạn có thể sử dụng git checkout -b <tên-nhánh-mới>. Ví dụ: git checkout -b new-feature.
+
+Điều hướng đến một commit cụ thể: Bằng cách sử dụng git checkout <commit-id>, bạn có thể điều hướng tới một commit cụ thể trong lịch sử của dự án. Tuy nhiên, hãy lưu ý rằng bạn sẽ ở trong trạng thái "detached HEAD", không nằm trên bất kỳ nhánh nào.
+
+Khôi phục các tệp hoặc thư mục từ các phiên bản trước đó: Bạn có thể sử dụng git checkout để khôi phục các tệp hoặc thư mục từ các commit trước đó. Ví dụ: git checkout <commit-id> -- tên-tệp để khôi phục một tệp cụ thể từ commit đó.
+
+Lưu ý rằng các phiên bản Git mới đã bổ sung các hành động khác và khuyến nghị sử dụng git switch và git restore thay thế cho một số tình huống nhất định, nhưng git checkout vẫn là một trong những lệnh quan trọng và được sử dụng rộng rãi trong các phiên bản trước đó.
+
+
 
 
 
