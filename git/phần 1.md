@@ -151,6 +151,17 @@ Các lệnh cơ bản :
 
 - git branch -d <branch-name>: Xóa một nhánh đã hoàn thành.
 
+# Thực hành git branch:
+![10](https://github.com/nguyenhason1995/research-devops/blob/main/git/image/Screenshot_10.png) 
+
+![11](https://github.com/nguyenhason1995/research-devops/blob/main/git/image/Screenshot_11.png) 
+
+![12](https://github.com/nguyenhason1995/research-devops/blob/main/git/image/Screenshot_12.png) 
+
+![13](https://github.com/nguyenhason1995/research-devops/blob/main/git/image/Screenshot_13.png) 
+
+![14](https://github.com/nguyenhason1995/research-devops/blob/main/git/image/Screenshot_14.png) 
+
 # HEAD: 
 
 HEAD là một con trỏ đặc biệt trong Git, được sử dụng để chỉ vị trí hiện tại của bạn trong repository. HEAD thường trỏ đến commit cuối cùng trên 
@@ -181,8 +192,56 @@ Nếu chắc chắn sẽ xóa branch này thì dùng -D
 
 - git branch -D <branch_to-delete-name>
 
+# Thực hành rename branch và delete branch
+
+![15](https://github.com/nguyenhason1995/research-devops/blob/main/git/image/Screenshot_15.png) 
 
 
+![16](https://github.com/nguyenhason1995/research-devops/blob/main/git/image/Screenshot_16.png) 
+
+# Merge:
+Có 3 loại merge:
+
+- Fast Forward Merge
+
+- Multi Branch Commit Merge with no conflict
+
+- Multi Branch Commit Merge with a conflict
+
+# Ví dụ minh họa:
+
+- Fast Forward Merge
+
+![17](https://github.com/nguyenhason1995/research-devops/blob/main/git/image/Screenshot_17.png) 
+
+
+- Multi Branch Commit Merge with no conflict
+
+tuy update trên multi branch nhưng khi update lại không ảnh hưởng đến file chung (tạo mới) nên nó không bị 
+
+conflict
+
+![18](https://github.com/nguyenhason1995/research-devops/blob/main/git/image/Screenshot_18.png) 
+
+![19](https://github.com/nguyenhason1995/research-devops/blob/main/git/image/Screenshot_19.png) 
+
+- Multi Branch Commit Merge with a conflict
+
+![20](https://github.com/nguyenhason1995/research-devops/blob/main/git/image/Screenshot_20.png) 
+
+# Git diff:
+
+Khi làm việc với nhiều branch hoặc nhiều file version, đây là công cụ hiệu quả có thể hiện thị điểm khác 
+
+nhau giữa các version. Nó giúp show ra điểm khác biệt giữa các version trong 1 file.
+
+**Symtax của git diff**
+
+![21](https://github.com/nguyenhason1995/research-devops/blob/main/git/image/Screenshot_21.png) 
+
+**Ví dụ**
+
+![22](https://github.com/nguyenhason1995/research-devops/blob/main/git/image/Screenshot_22.png) 
 
 
 
