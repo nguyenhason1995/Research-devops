@@ -288,9 +288,34 @@ viết lên file:
 ![31](https://github.com/nguyenhason1995/research-devops/blob/main/git/image/Screenshot_31.png)
 
 ![32](https://github.com/nguyenhason1995/research-devops/blob/main/git/image/Screenshot_32.png)
-
+**Note**: restore để rollback file
 ## git reset
 
-Git reset cho phép 
+- Git reset cho phép xóa commit và reset branch 
 
+Có 2 loại reset :
+git reset ########
+- xóa commit phía trước, file không thay đổi.
+git reset ######## --hard
+- xóa commit và thay đổi trong file.
 
+**VÍ DỤ**
+![33](https://github.com/nguyenhason1995/research-devops/blob/main/git/image/Screenshot_33.png)
+
+![34](https://github.com/nguyenhason1995/research-devops/blob/main/git/image/Screenshot_34.png)
+
+Reset về "two commit"
+
+![35](https://github.com/nguyenhason1995/research-devops/blob/main/git/image/Screenshot_35.png)
+
+đã remove commit nhưng file không thay đổi, giờ cùng kiểm tra commit trong git log
+
+![36](https://github.com/nguyenhason1995/research-devops/blob/main/git/image/Screenshot_36.png)
+
+Sau đó add lại nội dùng trong file và update lại commit 
+
+![37](https://github.com/nguyenhason1995/research-devops/blob/main/git/image/Screenshot_37.png)
+
+Giờ reset lại về two commit nhưng thêm trường hard (sẽ xóa file về trạng thái đó)
+
+![38](https://github.com/nguyenhason1995/research-devops/blob/main/git/image/Screenshot_38.png)
