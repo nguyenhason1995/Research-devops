@@ -288,15 +288,18 @@ viết lên file:
 ![31](https://github.com/nguyenhason1995/research-devops/blob/main/git/image/Screenshot_31.png)
 
 ![32](https://github.com/nguyenhason1995/research-devops/blob/main/git/image/Screenshot_32.png)
+
 **Note**: restore để rollback file
+
 ## git reset
 
 - Git reset cho phép xóa commit và reset branch 
 
 Có 2 loại reset :
-git reset ########
+`git reset ########`
 - xóa commit phía trước, file không thay đổi.
-git reset ######## --hard
+
+`git reset ######## --hard`
 - xóa commit và thay đổi trong file.
 
 **VÍ DỤ**
