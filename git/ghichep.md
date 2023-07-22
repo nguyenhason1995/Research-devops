@@ -258,6 +258,9 @@ Khôi phục các tệp hoặc thư mục từ các phiên bản trước đó: 
 
 Lưu ý rằng các phiên bản Git mới đã bổ sung các hành động khác và khuyến nghị sử dụng git switch và git restore thay thế cho một số tình huống nhất định, nhưng git checkout vẫn là một trong những lệnh quan trọng và được sử dụng rộng rãi trong các phiên bản trước đó.
 
+**Note**
+Git checkout có thể move sang branch khác hoặc 1 commit khác trong branch 
+
 **Ví dụ**
 
 ![23](https://github.com/nguyenhason1995/research-devops/blob/main/git/image/Screenshot_23.png)
@@ -289,7 +292,7 @@ viết lên file:
 
 ![32](https://github.com/nguyenhason1995/research-devops/blob/main/git/image/Screenshot_32.png)
 
-**Note**: restore để rollback file
+**Note**: restore để rollback file. Và file không được ***commit***
 
 ## git reset
 
@@ -322,3 +325,38 @@ Sau đó add lại nội dùng trong file và update lại commit
 Giờ reset lại về two commit nhưng thêm trường hard (sẽ xóa file về trạng thái đó)
 
 ![38](https://github.com/nguyenhason1995/research-devops/blob/main/git/image/Screenshot_38.png)
+
+# Git revert:
+Sử dụng khi muốn roll back lại commit trước đấy nhưng không muốn xóa commit đó đi. Thay vào đó sẽ tạo ra một commit mới tương tự như commit muốn roll back
+
+![39](https://github.com/nguyenhason1995/research-devops/blob/main/git/image/Screenshot_39.png)
+
+![40](https://github.com/nguyenhason1995/research-devops/blob/main/git/image/Screenshot_40.png)
+
+# Git stash
+
+git stash trong Git được sử dụng để tạm thời lưu trữ các thay đổi chưa được commit trong vùng làm việc của bạn mà không cần commit chúng. Khi bạn đang làm việc trên một nhánh nhưng cần chuyển sang một nhiệm vụ khác hoặc sửa lỗi trên nhánh khác, bạn có thể sử dụng git stash để tạm thời giấu đi các thay đổi hiện tại và làm việc với nhánh hoặc nhiệm vụ mới.
+
+Khi thực hiện git stash, Git sẽ lưu trữ những thay đổi chưa được commit vào một ngăn xếp tạm thời (stash stack). Sau khi stash, thư mục làm việc của bạn sẽ trở về trạng thái trước khi bạn bắt đầu thay đổi. Bạn có thể chuyển đổi sang nhánh hoặc làm việc với các tệp tin khác mà không gây ảnh hưởng đến những thay đổi được stash.cd
+
+Sau khi bạn đã hoàn thành công việc trên nhánh khác hoặc nhiệm vụ khác, bạn có thể quay lại nhánh ban đầu hoặc chỗ làm việc trước đó và muốn áp dụng lại các thay đổi bạn đã stash. Bạn có thể sử dụng git stash pop để áp dụng các thay đổi stash mới nhất và loại bỏ nó khỏi stash stack, hoặc sử dụng git stash apply để áp dụng các thay đổi stash mà không loại bỏ nó khỏi stash stack.
+
+git stash là một công cụ hữu ích khi bạn muốn chuyển đổi giữa các công việc khác nhau mà không cần tạo commit tạm thời hoặc lo lắng về việc ghi đè lên các thay đổi chưa hoàn thành.
+
+# git remote
+remote từ vscode đến remote repository(không cần thiết lắm, sử dụng commandline cho tiện)
+
+file `.gitignore` là file có chứa những file mà git hub loại bỏ
+
+Có thể định nghĩa các file ignore: 
+
+- Mypaswords.txt 
+ignore 1 file cụ thể
+
+- directory_name/
+ignore mọi thứ trong đường dẫn 
+- *.sql
+ignore mọi thứ có đuôi .sql
+
+
+
