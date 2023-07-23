@@ -79,3 +79,38 @@ test the car:
 # Kiểm tra xem những từ đó có trong file car.txt hay không.
 ```
 
+![ảnh12](https://github.com/tuhocdevops/research-devops/blob/main/gitlab/image/Screenshot_12.png)
+
+![ảnh13](https://github.com/tuhocdevops/research-devops/blob/main/gitlab/image/Screenshot_13.png)
+
+Giờ trong pipeline của chúng ta có 2 giai đoạn `build` và `test`. Quá trình `test` đang bị false
+
+![ảnh14](https://github.com/tuhocdevops/research-devops/blob/main/gitlab/image/Screenshot_14.png)
+
+Giờ chúng ta fix lại trong file yaml
+
+![ảnh15](https://github.com/tuhocdevops/research-devops/blob/main/gitlab/image/Screenshot_15.png)
+
+![ảnh16](https://github.com/tuhocdevops/research-devops/blob/main/gitlab/image/Screenshot_16.png)
+
+Quá trình build vẫn lỗi. Vào check xem lỗi gì 
+
+![ảnh17](https://github.com/tuhocdevops/research-devops/blob/main/gitlab/image/Screenshot_17.png)
+
+Bị lỗi tiếp trong quá trình test bên trong file. Giờ cùng edit lại file build
+
+![ảnh18](https://github.com/tuhocdevops/research-devops/blob/main/gitlab/image/Screenshot_18.png)
+
+Tất cả các bước lỗi là để check script `test` có hoạt động hay không
+
+![ảnh19](https://github.com/tuhocdevops/research-devops/blob/main/gitlab/image/Screenshot_19.png)
+
+Thực hiện thành công.
+
+
+
+
+
+
+
+
