@@ -109,10 +109,7 @@ Thực hiện thành công.
 
 # Setup Git để sử dụng Gitlab (bao gồm SSH key)
 
-{@youtube: https://www.youtube.com/watch?v=Vmt0V6a3ppE}
-
-
-
+[Setup Git để sử dụng Gitlab (bao gồm SSH key)](https://www.youtube.com/watch?v=Vmt0V6a3ppE)
 
 
 
