@@ -111,5 +111,54 @@ Thực hiện thành công.
 
 [Setup Git để sử dụng Gitlab (bao gồm SSH key)](https://www.youtube.com/watch?v=Vmt0V6a3ppE)
 
+# Git architechture:
+
+Máy chủ git lab sẽ cung cấp cho chúng ta giao diện, cho phép tạo kho lưu trữ và quản lý mọi thứ liên quan đến dự án của mình. Mọi dữ liệu sẽ được lưu trữ trong database của Gitlab. Ngay sau khi tạo 1 pipeline, pipeline đó cũng được quản lý bởi Gitlab, nhưng nó sẽ được ủy quyền dến Gitlab runner. Vậy Gitlab runner sẽ làm gì:
+GitLab Runner là một phần mềm mã nguồn mở của GitLab, được sử dụng để thực thi các công việc liên quan đến CI/CD (Continuous Integration/Continuous Deployment) trong dự án phần mềm. Nó hoạt động như một agent để thực hiện các bước xây dựng, kiểm tra và triển khai tự động dựa trên các mã nguồn và cấu hình được định nghĩa trong tệp ``.gitlab-ci.yml``.
+
+Một số nhiệm vụ chính của Gitlab Runner bao gồm: 
+- Thực thi Continuous Integration (CI)
+- Thực hiện Continuous Deployment (CD)
+
+Trong kiến trúc của GitLab, GitLab Server là thành phần quan trọng giữa cho phép quản lý và lưu trữ mã nguồn, quản lý dự án và triển khai các tính năng khác của GitLab.
+
+Tác dụng chính của GitLab Server bao gồm:
+- Quản lý mã nguồn: GitLab Server cung cấp môi trường cho việc quản lý mã nguồn thông qua hệ thống kiểm phiên bản Git. Nó cho phép lưu trữ mã nguồn, quản lý nhánh, theo dõi thay đổi, và hợp nhất các phiên bản mã nguồn khác nhau từ các nhà phát triển khác nhau trong dự án.
+- Quản lý dự án: GitLab Server cung cấp một giao diện quản lý dự án để theo dõi tiến độ, tác giả, lịch sử thay đổi và các vấn đề liên quan đến mã nguồn. Điều này giúp các nhóm phát triển làm việc cùng nhau, giám sát quá trình phát triển và đảm bảo chất lượng mã nguồn.
+- CICD: GitLab Server kết hợp tích hợp liên tục và triển khai liên tục (CI/CD) để tự động xây dựng, kiểm tra và triển khai mã nguồn. Điều này giúp cải thiện hiệu suất phát triển và giảm thiểu thời gian triển khai mã nguồn.
+- Quản lý issue: GitLab Server cung cấp các công cụ quản lý vấn đề tích hợp, cho phép người dùng tạo, gán và theo dõi các vấn đề, lỗi và yêu cầu tính năng. Điều này giúp tăng cường sự hợp tác trong dự án và theo dõi tiến độ giải quyết các vấn đề.
+
+Ngoài ra có khả năng scale up,down GitlabRunner tùy thuộc vào tình hình thực tế yêu cầu.
+
+# Basic CI/CD workflow với Gitlab:
+
+## CI/CD là gì:
+
+Đây là 2 phương pháp và quy trinh liên quan đến việc tự dộng hóa các bước trong quá trình build ,testing và deploy phần mềm. 
+
+- Continuous Integration (CI): là một quy trinh phát triển phần mềm trong đó các thành viên trong nhóm dev thường xuyền đưa mã code của họ lên hệ thống version control (Gitlab,Github). Mỗi khi có sự thay đổi trong source code, quá trình CI sẽ tự động kích hoạt việc build và tự động kiểm thử source này. Mục tiêu của CI là tạo ra môi trường liên tục phát hiện sớm các lỗi tích hợp và nâng cấp chất lượng source code.
+
+- Continuous Deployment/Delivery (CD): Sau khi source code đã trải qua quá trình kiểm tra và build trong quá trình CI, quy trình CD tự động deploy source code này và môi trường produce (production environment) hoặc môi trường thử nghiệm (staging environment) một cách tự động. Nếu quy trình triển khai là tự động và ngay lập tức vào môi trường produce thì được gọi là Continuous Deploymen. Nếu triển khai tự động vào môi trường thử nghiệm và cần sự xác nhận của người quản trị trước khi triển khai vào môi trường sản phẩm thì được gọi là Continuous Delivery.
+
+CI/CD là một phương pháp tự động hoá trong quá trình phát triển phần mềm, giúp tăng cường chất lượng, giảm thiểu rủi ro và nhanh chóng đưa các tính năng mới hoặc bản vá lỗi vào hoạt động. Nó đóng vai trò quan trọng trong quy trình phát triển phần mềm linh hoạt và hiệu quả.
+
+## Lab: sử dụng nodejs và npm để xây dựng một trang web tĩnh
+
+trước tiên cài nodejs 
+[link cài nodejs)](https://medium.com/devops-with-valentine/how-to-install-node-js-and-npm-on-windows-10-windows-11-139442f90f12)
+
+Bước tiếp theo sẽ là cài đặt gastby 
+[link cài gatsby)](https://www.gatsbyjs.com/docs/quick-start/#install-the-gatsby-cli)
+
+Kết quả cài đặt web:
+
+![ảnh20](https://github.com/tuhocdevops/research-devops/blob/main/gitlab/image/Screenshot_20.png)
+
+Tạo project mới
+
+![ảnh21](https://github.com/tuhocdevops/research-devops/blob/main/gitlab/image/Screenshot_21.png)
+
+![ảnh22](https://github.com/tuhocdevops/research-devops/blob/main/gitlab/image/Screenshot_22.png)
+
 
 
