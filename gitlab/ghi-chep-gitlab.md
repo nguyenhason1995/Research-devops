@@ -107,7 +107,9 @@ Tất cả các bước lỗi là để check script `test` có hoạt động h
 
 Thực hiện thành công.
 
+# Setup Git để sử dụng Gitlab (bao gồm SSH key)
 
+{@gitlab(ssh): https://www.youtube.com/watch?v=Vmt0V6a3ppE}
 
 
 
