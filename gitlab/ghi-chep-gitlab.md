@@ -160,5 +160,50 @@ Tạo project mới
 
 ![ảnh22](https://github.com/tuhocdevops/research-devops/blob/main/gitlab/image/Screenshot_22.png)
 
+![ảnh23](https://github.com/tuhocdevops/research-devops/blob/main/gitlab/image/Screenshot_23.png)
+
+cài gastby cli
+```php
+npm install -g gatsby-cli
+```
+[link cài cli)](https://www.gatsbyjs.com/docs/reference/gatsby-cli/)
+
+**build project sử dụng GitlabCI**
+
+![ảnh24](https://github.com/tuhocdevops/research-devops/blob/main/gitlab/image/Screenshot_24.png)
+
+![ảnh25](https://github.com/tuhocdevops/research-devops/blob/main/gitlab/image/Screenshot_25.png)
+
+Hướng dẫn link từ vscode tới gitlab:
+[link](https://www.youtube.com/watch?v=eWo9C2DXX5c)
+
+![ảnh26](https://github.com/tuhocdevops/research-devops/blob/main/gitlab/image/Screenshot_26.png)
+
+![ảnh27](https://github.com/tuhocdevops/research-devops/blob/main/gitlab/image/Screenshot_27.png)
+
+Lỗi này!!! do chưa cài image cho npm
+
+![ảnh28](https://github.com/tuhocdevops/research-devops/blob/main/gitlab/image/Screenshot_28.png)
+
+![ảnh29](https://github.com/tuhocdevops/research-devops/blob/main/gitlab/image/Screenshot_29.png)
+
+sửa lại code 1 chút!!
+
+![ảnh30](https://github.com/tuhocdevops/research-devops/blob/main/gitlab/image/Screenshot_30.png)
+
+Sau khi edit đã build thành công.
+
+**Add stage test**
+
+![ảnh31](https://github.com/tuhocdevops/research-devops/blob/main/gitlab/image/Screenshot_31.png)
+
+Mục đích grep ra nếu có kq là đúng, nếu exit trả ra là 1 thì false
+
+**Running job in parallel**
+
+![ảnh32](https://github.com/tuhocdevops/research-devops/blob/main/gitlab/image/Screenshot_32.png)
+
+
+
 
 
