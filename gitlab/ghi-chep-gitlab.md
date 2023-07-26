@@ -203,6 +203,344 @@ Mục đích grep ra nếu có kq là đúng, nếu exit trả ra là 1 thì fal
 
 ![ảnh32](https://github.com/tuhocdevops/research-devops/blob/main/gitlab/image/Screenshot_32.png)
 
+**Run job background**
+Sử dụng lệnh `&` để chạy background
+
+```yaml
+stages:
+  - build
+  - test
+build website:
+  stage: build
+  image: node:18
+  script: 
+    - npm install 
+    - npm install -g gatsby-cli
+    - gatsby build 
+  artifacts:
+    paths:
+      - ./public
+
+test artifacts:
+  image: alpine
+  stage: test
+  script: 
+    - grep -q "Gatsby" ./public/index.html
+
+test website:
+  image: node
+  stage: test
+  script:
+    - npm install
+    - npm install -g gatsby-cli
+    - gatsby serve &
+    - sleep 3
+    - curl "http://localhost:9000" | tac | tac | grep -q "Gatsby"
+```
+
+Đã build và test xong web tĩnh.
+
+**Deploy sử dụng surge.sh**
+
+Surge là gì: 
+
+Surge là một dịch vụ cung cấp hosting tĩnh cho các trang web. Nó cho phép bạn dễ dàng triển khai các trang web tĩnh (không có máy chủ phía sau, chỉ gồm các tập tin HTML, CSS, JavaScript và hình ảnh) lên internet một cách nhanh chóng và đơn giản.
+
+![ảnh34](https://github.com/tuhocdevops/research-devops/blob/main/gitlab/image/Screenshot_34.png)
+
+![ảnh35](https://github.com/tuhocdevops/research-devops/blob/main/gitlab/image/Screenshot_35.png)
+
+**Quản lý secret**
+
+Thông thường sẽ không muốn lưu giữ những thông tin cần bảo mật (username hay password hay token). Đây là những nội dụng nhạy cảm. Và gitlab đề xuất 1 giải pháp để lưu trữ những thông tin nhạy cảm kiểu như vậy. Bây giờ mục tiêu là có thể sử dụng Gitlab CI để deploy website để search. Như chúng ta đã thấy, chúng ta tương tác với interface nơi sẽ dùng email và pasword. 
+
+Thay vì sử dụng user và password, bạn cung cấp token và bạn có thể thu hồi lại sau đó nếu nó bị xâm phạm. Trước tiên sẽ phải tìm và tạo token. 
+
+Tạo surge token
+
+![ảnh36](https://github.com/tuhocdevops/research-devops/blob/main/gitlab/image/Screenshot_36.png)
+
+![ảnh37](https://github.com/tuhocdevops/research-devops/blob/main/gitlab/image/Screenshot_37.png)
+
+![ảnh38](https://github.com/tuhocdevops/research-devops/blob/main/gitlab/image/Screenshot_38.png)
+
+![ảnh39](https://github.com/tuhocdevops/research-devops/blob/main/gitlab/image/Screenshot_39.png)
+
+
+![ảnh40](https://github.com/tuhocdevops/research-devops/blob/main/gitlab/image/Screenshot_40.png)
+
+Mật khẩu thì che đi 
+
+![ảnh41](https://github.com/tuhocdevops/research-devops/blob/main/gitlab/image/Screenshot_41.png)
+
+**Deploy using surge.sh và GitlabCI**
+
+**Deploy website lên GitlabCI**
+
+![ảnh42](https://github.com/tuhocdevops/research-devops/blob/main/gitlab/image/Screenshot_42.png)
+
+deploy to surge:
+
+```yaml
+image: node
+
+stages:
+  - build
+  - test
+  - deploy
+
+build website:
+  stage: build
+  script:
+    - npm install
+    - npm install -g gatsby-cli
+    - gatsby build
+  artifacts:
+    paths:
+      - ./public
+
+test artifacts:
+  image: alpine
+  stage: test
+  script:
+    - grep -q "Gatsby" ./public/index.html
+
+test website:
+  stage: test
+  script:
+    - npm install
+    - npm install -g gatsby-cli
+    - gatsby serve &
+    - sleep 3
+    - curl "http://localhost:9000" | tac | tac | grep -q "Gatsby"
+
+deploy to surge: 
+  stage: deploy
+  script:
+    - npm install --global surge
+    - surge --project ./public --domain useful-cats.surge.sh
+# sẽ không cần token nữa vì đã nhập và variable trên gitlab
+```
+**Ví dụ** :
+
+Let's extend the pipeline and add a new stage.
+
+== DO ==
+
+- add a new stage called "deployment tests".
+
+- create a new job called "test deployment"
+
+- download the first page of the website and search for a specific string (you can use the curl command)
+
+== QUESTION ==
+
+`How does your .gitlab-ci.yml file look like?`
+```yaml
+image: node
+
+stages:
+  - build
+  - test
+  - deploy
+  - deployment tests
+
+....
+
+test deployment:
+  stage: deployment tests
+  script:
+    curl -s "https://instazone.surge.sh" | grep "Hi people"
+```
+== QUESTION ==
+Let's find a way to improve the execution time.
+== DO ==
+```yaml
+stages:
+  - build
+  - test
+  - deploy
+  - deployment tests
+
+....
+
+test deployment:
+  image: alpine
+  stage: deployment tests
+  script:
+    - apk add --no-cache curl
+    - curl -s "https://instazone.surge.sh" | grep "Hi people"
+```
+File `.gitlab-ci.yml`
+
+```yml
+image: node
+
+stages:
+  - build
+  - test
+  - deploy
+  - deployment tests
+
+build website:
+  stage: build
+  script:
+    - npm install
+    - npm install -g gatsby-cli
+    - gatsby build
+  artifacts:
+    paths:
+      - ./public
+
+test artifacts:
+  image: alpine
+  stage: test
+  script:
+    - grep -q "Gatsby" ./public/index.html
+
+test website:
+  stage: test
+  script:
+    - npm install
+    - npm install -g gatsby-cli
+    - gatsby serve &
+    - sleep 3
+    - curl "http://localhost:9000" | tac | tac | grep -q "Gatsby"
+
+deploy to surge: 
+  stage: deploy
+  script:
+    - npm install --global surge
+    - surge --project ./public --domain useful-cats.surge.sh
+# sẽ không cần token nữa vì đã nhập và variable trên gitlab
+test deployment:
+  image: alpine
+  stage: deployment tests
+  script:
+    - apk add curl > /dev/null
+    - curl -s "https://instazone.surge.sh" | grep "Hi people"
+```
+
+# Gitlab CI Fundamental
+
+**Biến trong Gitlab**
+[tài liệu tham khảo về biến trong Gitlab)](https://docs.gitlab.com/ee/ci/variables/predefined_variables.html)
+
+Trong gitlab, các biến được sử dụng để lưu trữ các giá trị có thể được sử dụng trong quá trình thực thi các jobs trong CI/CD pipeline. Các biến này có thể chứa các thông tin như thông số cấu hình, các secret, đường dẫn file và nhiều thông tin khác.
+
+Có 2 loại biến chính trong Gitlab CICD:
+
+- **Biến hệ thống (System Variable)**: Đây là các biến được xác định sẵn bởi Gitlab và không cần phải tạo thủ công. Chúng chứa thông tin về môi trường thực thi và các hệ thống khác nhau. Ví dụ: `$CI_COMMIT_REF_NAME`
+(tên nhánh hiện tại) `$CI_PROJECT_DIR` (đường dẫn thư mục dự án) và nhiều biến khác.
+- **Biến được định nghĩa trước (Predefined Variables)**: Đây là các biến được tạo ra và được xác định sẵn trong Gitlab để hỗ trợ việc xây dựng và triển khai ứng dụng. Ví dụ: `$CI_JOB_ID` (ID của công việc), `$CI_COMMIT_SHA` (commit SHA hiện tại), và các biến khác nhau như `$CI_REGISTRY_USER`,`$CI_REGISTRY_PASSWORD` được sử dụng để truy cập vào Docker Registry
+- Có thể định nghĩa các biến tùy chỉnh(Custom Variables) trong các mô tả `.gitlab-ci.yml` hoặc thông qua các giao diện người dùng của Gitlab. Điều này cho phép bạn định nghĩa các biến riêng để sử dụng trong pipeline của mình. Ví dụ, bạn có thể định nghĩa một biến "VERSION" để lưu trữ số phiên bản của ứng dụng và sử dụng nó trong các bước xây dựng và triển khai.
+Việc sử dụng các biến trong GitLab CI/CD cho phép bạn truyền thông tin giữa các bước công việc, đồng bộ hóa thông tin giữa nhiều công việc, và giữ các thông tin nhạy cảm an toàn bằng cách không lưu trữ trực tiếp trong mã nguồn.
+
+![ảnh43](https://github.com/tuhocdevops/research-devops/blob/main/gitlab/image/Screenshot_43.png)
+
+Những biến môi trường hay được sử dụng trong Gitlab:
+```yml
+$CI_COMMIT_REF_NAME: Tên nhánh (branch) hiện tại.
+$CI_COMMIT_REF_SLUG: Tên nhánh hiện tại sau khi chuẩn hóa để sử dụng trong URL, host names và domain names.
+$CI_COMMIT_SHA: Commit SHA (mã hash) hiện tại.
+$CI_JOB_ID: ID của công việc (job).
+$CI_JOB_NAME: Tên của công việc (job).
+$CI_PIPELINE_ID: ID của pipeline hiện tại.
+$CI_PROJECT_DIR: Đường dẫn đến thư mục dự án trên runner.
+$CI_PROJECT_NAME: Tên dự án.
+$CI_REGISTRY_USER: Tên người dùng cho Docker Registry.
+$CI_REGISTRY_PASSWORD: Mật khẩu cho Docker Registry.
+$CI_COMMIT_TAG: Tag của commit hiện tại (chỉ tồn tại khi commit là một tag)
+```
+**Pipeline trigger**
+
+Có thể hẹn lịch trigger tự động
+
+![ảnh44](https://github.com/tuhocdevops/research-devops/blob/main/gitlab/image/Screenshot_44.png)
+
+![ảnh45](https://github.com/tuhocdevops/research-devops/blob/main/gitlab/image/Screenshot_45.png)
+
+![ảnh46](https://github.com/tuhocdevops/research-devops/blob/main/gitlab/image/Screenshot_46.png)
+
+**Sử dụng cache để tối ưu tốc độ**
+
+Một số job cần rất nhiều time để chạy. Nó cần tải xuống một số phụ thuộc trước khi có thể chạy khiến cho tốc độ chậm. Sử dụng bộ nhớ cache có thể tăng tốc độ thực thi công việc bằng cách hướng dẫn Gitlab lưu trữ một số tệp mà sau này chúng ta có thể cần dùng tới. Tất cả các cấu hình này đều nằm trong thư mục Node-Module
+
+![ảnh46](https://github.com/tuhocdevops/research-devops/blob/main/gitlab/image/Screenshot_46.png)
+
+policy: pull là một cài đặt cho cache trong GitLab CI. Khi sử dụng policy: pull, cache sẽ được tải xuống (pull) vào thời điểm bắt đầu thực thi công việc và sẽ không được tải lên (push) lại vào cuối công việc. Điều này đảm bảo rằng cache sẽ luôn được cập nhật và có sẵn khi bắt đầu một công việc mới, nhưng không cần phải tải lên lại cache sau khi công việc hoàn thành.
+
+```yaml
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - node_modules/
+  policy: pull
+```
+policy: push là một cài đặt khác cho cache trong GitLab CI. Khi sử dụng policy: push, cache sẽ không được tải xuống (pull) vào thời điểm bắt đầu thực thi công việc, nhưng sẽ được tải lên (push) lại vào cuối công việc sau khi công việc hoàn thành.
+
+```yaml
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - node_modules/
+  policy: push
+```
+
+Trong ví dụ trên, khi một công việc bắt đầu chạy, cache không sẽ được tải xuống từ phiên bản pipeline trước đó. Công việc sẽ thực hiện tất cả công việc mà không sử dụng cache. Tuy nhiên, khi công việc hoàn thành, cache sẽ được lưu trữ và tải lên lại để sẵn sàng sử dụng trong lần chạy tiếp theo. Điều này cho phép các thay đổi được lưu giữ trong cache và sử dụng cho các lần chạy sau.
+
+
+```yaml
+stages:
+  - build
+  - test
+  - deploy
+  - deployment tests
+  - cache
+
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - node_modules/
+  policy: pull
+  
+update cache:
+  stage: cache
+  script:
+    - npm install
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - node_modules/
+    policy: push
+  only:
+    - schedules
+```
+Cache mới này làm giảm thời gian build 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
