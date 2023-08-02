@@ -6,6 +6,6 @@ Tạo 2 jenkins:
 
 **Join Jenkin-node**
 
-Link hướng dẫn join node slave vào node jenkins-master
+Link hướng dẫn
 [join slave](https://www.youtube.com/watch?v=fphtfmAsfhU)
 
