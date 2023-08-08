@@ -466,7 +466,7 @@ Có thể hẹn lịch trigger tự động
 
 Một số job cần rất nhiều time để chạy. Nó cần tải xuống một số phụ thuộc trước khi có thể chạy khiến cho tốc độ chậm. Sử dụng bộ nhớ cache có thể tăng tốc độ thực thi công việc bằng cách hướng dẫn Gitlab lưu trữ một số tệp mà sau này chúng ta có thể cần dùng tới. Tất cả các cấu hình này đều nằm trong thư mục Node-Module
 
-![ảnh46](https://github.com/tuhocdevops/research-devops/blob/main/gitlab/image/Screenshot_46.png)
+![ảnh47](https://github.com/tuhocdevops/research-devops/blob/main/gitlab/image/Screenshot_47.png)
 
 policy: pull là một cài đặt cho cache trong GitLab CI. Khi sử dụng policy: pull, cache sẽ được tải xuống (pull) vào thời điểm bắt đầu thực thi công việc và sẽ không được tải lên (push) lại vào cuối công việc. Điều này đảm bảo rằng cache sẽ luôn được cập nhật và có sẵn khi bắt đầu một công việc mới, nhưng không cần phải tải lên lại cache sau khi công việc hoàn thành.
 
@@ -517,6 +517,118 @@ update cache:
     - schedules
 ```
 Cache mới này làm giảm thời gian build 
+
+**Phân biệt giữa cache và artifact**
+
+Cache và artifact là hai phương tiện để tăng hiệu suất và quản lý tài nguyên trong GitLab CI/CD. Tuy chúng có mục tiêu chung là giữ lại thông tin hoặc tài nguyên giữa các lần chạy, nhưng chúng được sử dụng trong các tình huống và mục đích khác nhau.
+
+- Cache:
+
+Sử dụng cache khi bạn muốn lưu trữ các phụ thuộc hoặc tệp tạm thời giữa các lần chạy của pipeline.
+Cache hữu ích khi các phụ thuộc không thay đổi thường xuyên, và việc tải xuống chúng mất nhiều thời gian hoặc tốn tài nguyên.
+Cache được lưu trữ trên máy chủ GitLab và sẽ tồn tại trong suốt chu kỳ chạy của pipeline.
+Cache thường được sử dụng để lưu trữ các thư viện, gói phụ thuộc, tệp tạo sẵn, và các thành phần khác mà không thay đổi thường xuyên trong quá trình thực thi pipeline.
+
+- Artifact:
+
+Sử dụng artifact khi bạn muốn lưu trữ các tệp kết quả của các công việc (jobs) để chuyển tiếp cho các công việc tiếp theo trong pipeline hoặc sử dụng sau này.
+Artifact có thể là bất kỳ tệp nào, ví dụ: tệp thực thi, tệp log, tệp kết quả kiểm tra, tệp phát triển, hình ảnh Docker, và nhiều hơn nữa.
+Artifact được lưu trữ trên GitLab Server và có thể truy cập qua giao diện web hoặc thông qua các API.
+Artifact thường được sử dụng để truyền dữ liệu giữa các giai đoạn (stages) của pipeline, hoặc để lưu trữ các tệp kết quả quan trọng để dễ dàng theo dõi và quản lý kết quả công việc.
+
+**environment**
+
+enviroment cho phép kiểm soát quá trình CD/ quá trình deployment. Nó có thể biết chính xác những gì deploy lên và trên môi trường nào. Chúng ta có thể biết hiện tại chúng ta đang được cài trên phiên bản hệ thống nào. 
+
+```yaml
+image: node:18
+
+stages:
+  - cache
+  - build
+  - test
+  - deploy staging
+  - deploy production
+  - production test
+
+
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - node_modules/
+  policy: pull
+  
+update cache:
+  stage: cache
+  script:
+    - npm install
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - node_modules/
+    policy: push
+  only:
+    - schedules
+
+build website:
+  stage: build
+  script:
+    - echo $CI_COMMIT_SHORT_SHA
+    - npm install
+    - npm install -g gatsby-cli
+    - gatsby build
+    - sed -i "s/%%VERSION%%/$CI_COMMIT_SHORT_SHA/" ./public/index.html
+  artifacts:
+    paths:
+      - ./public
+
+test artifact:
+  image: alpine
+  stage: test
+  script:
+    - grep -q "Gatsby" ./public/index.html
+
+test website:
+  stage: test
+  script:
+    - npm install
+    - npm install -g gatsby-cli
+    - gatsby serve &
+    - sleep 3
+    - curl "http://localhost:9000" | tac | tac | grep -q "Gatsby"
+
+deploy staging: 
+  stage: deploy staging
+  environment: 
+    name: staging
+    url: sonnh5-staging.surge.sh
+  script:
+    - npm install --global surge
+    - surge --project ./public --domain sonnh5-staging.surge.sh
+
+deploy production: 
+  stage: deploy production
+  environment: 
+    name: production
+    url: sonnh5.surge.sh
+  when: manual
+  allow_failure: false
+  script:
+    - npm install --global surge
+    - surge --project ./public --domain sonnh5.surge.sh
+
+production test:
+  image: alpine
+  stage: production test
+  script:
+    - apk add --no-cache curl
+    - curl -s "https://sonnh5.surge.sh" | grep -q "gatsby"
+
+```
+
+**Define variable**
+
+![ảnh48](https://github.com/tuhocdevops/research-devops/blob/main/gitlab/image/Screenshot_48.png)
 
 
 
